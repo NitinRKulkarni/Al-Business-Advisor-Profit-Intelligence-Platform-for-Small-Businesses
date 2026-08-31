@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Invoice extractor - S3-triggered Lambda that parses PDF invoices with
+  pdfplumber and stores structured data in DynamoDB (keyed by file_id).
+
+Parameters:
+  UploadBucketName:
+    Type: String
+    Description: Name of the S3 bucket where invoice PDFs are uploaded.
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 1024
+
+Resources:
+
+  InvoiceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: invoices
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: file_id
+          AttributeType: S
+        - AttributeName: invoice_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: file_id
+          KeyType: HASH
+      GlobalSecondaryIndexes:
+        - IndexName: invoice_id-index
+          KeySchema:
+            - AttributeName: invoice_id
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+
+  UploadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref UploadBucketName
+
+  InvoiceExtractorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      Environment:
+        Variables:
+          INVOICE_TABLE: !Ref InvoiceTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref InvoiceTable
+        - S3ReadPolicy:
+            BucketName: !Ref UploadBucketName
+      Events:
+        PdfUploaded:
+          Type: S3
+          Properties:
+            Bucket: !Ref UploadBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: .pdf
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: .
+      DockerTag: latest
+
+Outputs:
+  FunctionName:
+    Value: !Ref InvoiceExtractorFunction
+  TableName:
+    Value: !Ref InvoiceTable
+  BucketName:
+    Value: !Ref UploadBucket

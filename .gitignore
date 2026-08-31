@@ -1,0 +1,27 @@
+# Local tools & binaries
+jdk17/
+pgsql/
+pgdata/
+logs/
+*.log
+
+# VS Code & IDE files
+.vscode/
+argv.json
+extensions/
+session-index/
+sessions/
+workspace-roots/
+.trust-migration.json
+verify_out.txt
+
+# Python
+__pycache__/
+*.pyc
+*.db
+.venv/
+env/
+
+# Java / Maven build output
+java/target/
+java/.mvn/wrapper/maven-wrapper.jar

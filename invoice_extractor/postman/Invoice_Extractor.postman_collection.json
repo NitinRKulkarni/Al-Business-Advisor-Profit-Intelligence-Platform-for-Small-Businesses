@@ -1,0 +1,130 @@
+{
+  "info": {
+    "name": "Invoice Extractor API (local)",
+    "description": "Local testing collection for the FastAPI invoice-extractor service running at http://127.0.0.1:8080.\n\nHow to use:\n1. Start the API:  python -m uvicorn invoice_extractor.api:app --host 127.0.0.1 --port 8080 --reload\n2. Import this collection into Postman.\n3. Run 'Health' first, then 'Upload Invoice' (select a PDF in the form-data 'file' field). The upload saves {{document_id}} automatically for the follow-up requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080", "type": "string" },
+    { "key": "document_id", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Invoice (PDF)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 201', () => pm.response.to.have.status(201));",
+              "const body = pm.response.json();",
+              "if (body.document_id) {",
+              "  pm.collectionVariables.set('document_id', body.document_id);",
+              "  console.log('Saved document_id =', body.document_id);",
+              "}",
+              "pm.test('processed', () => pm.expect(['COMPLETED','PENDING']).to.include(body.status));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "sample_invoice.pdf",
+              "description": "Select a PDF invoice to upload."
+            },
+            { "key": "fileType", "value": "Invoice", "type": "text" },
+            { "key": "tenant_id", "value": "demo-tenant", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/files/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "files", "upload"]
+        },
+        "description": "Uploads a PDF, deduplicates by SHA-256, parses it, and stores the result. Returns 201 with a document_id, or 409 if the same bytes were already uploaded for this tenant."
+      },
+      "response": []
+    },
+    {
+      "name": "List Files",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/files?fileType=Invoice",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "files"],
+          "query": [
+            { "key": "fileType", "value": "Invoice", "description": "Optional filter: Invoice | WhatsAppChat | BankStmt | Inventory" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get File by document_id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/files/{{document_id}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "files", "{{document_id}}"]
+        },
+        "description": "Fetches the parsed invoice for the document_id captured by the Upload request."
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Duplicate (expect 409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status is 409', () => pm.response.to.have.status(409));",
+              "pm.test('duplicate error', () => pm.expect(pm.response.json().detail.error).to.eql('DUPLICATE_FILE'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "file", "type": "file", "src": "sample_invoice.pdf" },
+            { "key": "fileType", "value": "Invoice", "type": "text" },
+            { "key": "tenant_id", "value": "demo-tenant", "type": "text" }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/files/upload",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "v1", "files", "upload"]
+        },
+        "description": "Re-upload the SAME file to verify SHA-256 dedup returns 409 DUPLICATE_FILE."
+      },
+      "response": []
+    }
+  ]
+}
