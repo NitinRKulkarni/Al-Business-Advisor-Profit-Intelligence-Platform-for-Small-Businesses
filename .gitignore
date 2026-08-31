@@ -22,6 +22,5 @@ __pycache__/
 .venv/
 env/
 
-# Java / Maven build output
-java/target/
-java/.mvn/wrapper/maven-wrapper.jar
+# Java
+java/
