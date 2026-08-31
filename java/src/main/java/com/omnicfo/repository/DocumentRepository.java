@@ -39,5 +39,14 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
      * Fetch documents for a tenant filtered by type, sorted by newest first.
      */
     List<Document> findByOrganizationIdAndFileTypeOrderByUploadDateDesc(UUID organizationId, com.omnicfo.model.enums.FileType fileType);
+
+    /**
+     * Fetch top 10 documents in strict FIFO order (oldest first) matching processed status and file type.
+     */
+    List<Document> findTop10ByProcessedStatusAndFileTypeOrderByUploadDateAsc(
+        com.omnicfo.model.enums.ProcessedStatus processedStatus,
+        com.omnicfo.model.enums.FileType fileType
+    );
 }
+
 

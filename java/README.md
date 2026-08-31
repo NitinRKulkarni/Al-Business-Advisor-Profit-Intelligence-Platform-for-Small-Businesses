@@ -8,6 +8,24 @@
 
 ## 📅 Activity Log & Development History
 
+### **[2026-08-31] — Milestone 2: Asynchronous FIFO Poller & Python AI Service Trigger**
+
+#### **1. Scheduled FIFO Poller (`InvoiceTriggerService`)**
+- Added `@Scheduled(fixedDelay = 30000)` poller executing every 30 seconds to fetch up to 10 oldest `PENDING` invoices (FIFO).
+- Added query method in `DocumentRepository`: `findTop10ByProcessedStatusAndFileTypeOrderByUploadDateAsc(...)`.
+- Immediately transitions status to `PROCESSING` prior to dispatch to prevent duplicate polling in distributed environments.
+
+#### **2. External Python AI Service Integration**
+- Configured dynamic `ai.service.python.base-url` and `ai.service.python.invoice-endpoint` in `application.yml`.
+- Created `AiClientConfig` providing a Spring Boot 3 `RestClient` bean.
+- Implemented fire-and-forget `POST /extract/invoice` with `application/x-www-form-urlencoded` payload containing `document_id`.
+- Added automated fallback error handling: if the Python service fails or is unreachable, the document status is safely updated to `FAILED`.
+
+#### **3. Local Testing Mock (`mock_ai_service.py`)**
+- Created a standalone Python HTTP server (`mock_ai_service.py`) on port 8000 simulating the AI service with zero dependencies.
+
+---
+
 ### **[2026-08-30] — Milestone 1: Multi-Tenant Ingestion, Listing API & Cloud Provisioning**
 
 #### **1. Multi-Tenant Document Upload & Ingestion API**

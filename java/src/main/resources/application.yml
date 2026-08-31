@@ -25,3 +25,10 @@ spring:
 
 server:
   port: 8080
+
+ai:
+  service:
+    python:
+      base-url: ${AI_PYTHON_SERVICE_URL:http://localhost:8000}
+      invoice-endpoint: /extract/invoice
+
