@@ -1,0 +1,10 @@
+# Frontend dependencies
+frontend/node_modules/
+
+# Java build files
+java/target/
+
+# Environment files
+.env
+java/.env
+frontend/dist/
