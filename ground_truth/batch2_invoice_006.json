@@ -1,0 +1,18 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_006.png",
+  "category": "clean_handwritten_with_gst",
+  "vendor_name": "Friends Mobile Center",
+  "receipt_number": "0311",
+  "invoice_number": null,
+  "date": "2024-06-02",
+  "subtotal": 950.00,
+  "discount": null,
+  "tax": 171.00,
+  "total": 1121.00,
+  "items": [
+    {"description": "Tempered Glass", "quantity": 1, "unit_price": 150.00, "amount": 150.00},
+    {"description": "Back Cover", "quantity": 1, "unit_price": 200.00, "amount": 200.00},
+    {"description": "Earphones", "quantity": 1, "unit_price": 250.00, "amount": 250.00},
+    {"description": "Charger", "quantity": 1, "unit_price": 350.00, "amount": 350.00}
+  ]
+}

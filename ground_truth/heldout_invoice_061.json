@@ -1,0 +1,20 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_061.png",
+  "category": "heldout_printed_net_total_label_with_discount",
+  "_note": "HELD-OUT evaluation receipt: transcribed AFTER the implementation was finished, never used to tune any threshold, regex, weight or gate. Image-to-file mapping was verified by opening THIS image on its own. Notable generalization test: the final payable line is labelled 'Net Total', NOT 'Grand Total' -- a label the extractor's keyword set was not built around. Amounts are written without decimals and with a trailing '/-'. Internally consistent: 13999+199+149+599 = 14946 (printed 'Total'), and 14946 - 946 = 14000 (printed 'Net Total'), so the payable total is 14000 and the 14946 line is the pre-discount subtotal.",
+  "vendor_name": "Shree Vinayaka Mobiles",
+  "customer_name": "Pradeep K",
+  "receipt_number": "6310",
+  "invoice_number": null,
+  "date": "2022-04-27",
+  "subtotal": 14946.00,
+  "discount": 946.00,
+  "tax": null,
+  "total": 14000.00,
+  "items": [
+    {"description": "Redmi Note 10 (6/128)", "quantity": 1, "unit_price": 13999.00, "amount": 13999.00},
+    {"description": "Back Cover", "quantity": 1, "unit_price": 199.00, "amount": 199.00},
+    {"description": "Tempered Glass", "quantity": 1, "unit_price": 149.00, "amount": 149.00},
+    {"description": "Fast Charger", "quantity": 1, "unit_price": 599.00, "amount": 599.00}
+  ]
+}

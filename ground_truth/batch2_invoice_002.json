@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_002.png",
+  "category": "clean_handwritten_with_discount",
+  "vendor_name": "Vijay Book Depot",
+  "receipt_number": "0893",
+  "invoice_number": null,
+  "date": "2024-05-18",
+  "subtotal": 430.00,
+  "discount": 20.00,
+  "tax": null,
+  "total": 410.00,
+  "items": [
+    {"description": "Classmate Notebook", "quantity": 5, "unit_price": 40.00, "amount": 200.00},
+    {"description": "Ball Pen (Blue)", "quantity": 10, "unit_price": 10.00, "amount": 100.00},
+    {"description": "Pencil (Apsara)", "quantity": 10, "unit_price": 5.00, "amount": 50.00},
+    {"description": "Eraser", "quantity": 2, "unit_price": 10.00, "amount": 20.00},
+    {"description": "Geometry Box", "quantity": 1, "unit_price": 60.00, "amount": 60.00}
+  ]
+}

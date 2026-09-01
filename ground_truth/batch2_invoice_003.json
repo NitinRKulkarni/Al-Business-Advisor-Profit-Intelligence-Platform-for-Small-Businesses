@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_003.png",
+  "category": "clean_handwritten_with_gst",
+  "vendor_name": "New Star Electricals",
+  "receipt_number": "2156",
+  "invoice_number": null,
+  "date": "2024-05-22",
+  "subtotal": 1600.00,
+  "discount": null,
+  "tax": 288.00,
+  "total": 1888.00,
+  "items": [
+    {"description": "LED Bulb 9W", "quantity": 10, "unit_price": 75.00, "amount": 750.00},
+    {"description": "Switch 6A", "quantity": 5, "unit_price": 30.00, "amount": 150.00},
+    {"description": "Plug Top 5A", "quantity": 5, "unit_price": 20.00, "amount": 100.00},
+    {"description": "Wire 1.5 sq.mm", "quantity": 20, "unit_price": 18.00, "amount": 360.00},
+    {"description": "Tube Light 20W", "quantity": 2, "unit_price": 120.00, "amount": 240.00}
+  ]
+}

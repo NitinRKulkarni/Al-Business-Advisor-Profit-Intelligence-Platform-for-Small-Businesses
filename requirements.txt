@@ -1,0 +1,28 @@
+opencv-python==5.0.0.93
+numpy==2.5.2
+Pillow==12.3.0
+
+# OCR stage (ocr/ package). pytesseract is a thin wrapper only -- it shells
+# out to a Tesseract binary that must be installed separately at the system
+# level (Windows: winget install --id UB-Mannheim.TesseractOCR).
+pytesseract==0.3.13
+
+# Challenger OCR engine evaluated against the Tesseract baseline. Pulls
+# torch/torchvision/scipy/scikit-image transitively (~250MB of wheels) and
+# downloads ~100MB of model weights on first use. Also pulls
+# opencv-python-headless, which provides the same cv2 module as
+# opencv-python above; both resolve to 5.0.0.93 and the preprocessing
+# pipeline uses no GUI functions, so they coexist safely -- reinstall
+# opencv-python last if cv2 ever misbehaves.
+easyocr==1.7.2
+
+# --- test / development only -------------------------------------------
+# Required to run the test suite (`python -m pytest -q`, 243 tests). Listed
+# here rather than in a separate requirements-dev.txt because this project
+# is a single component with one environment, and the README instructs
+# running the suite as part of normal verification -- so a fresh clone that
+# installed only the runtime packages could not follow its own README.
+# Not imported by any module under image_processing/, ocr/ or
+# receipt_extraction/, so it is not needed to USE the pipeline in
+# production -- only to verify it.
+pytest==9.1.1

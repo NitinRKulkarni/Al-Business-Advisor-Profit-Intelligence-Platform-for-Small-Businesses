@@ -1,0 +1,21 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_087.png",
+  "category": "dark_underexposed_no_gst",
+  "_note": "CORRECTED 2026-08-31: the previous version of this file described a different receipt ('Sudha Tailors') that does not match this image path -- a transcription error, caught by visually re-inspecting the actual image against the manifest mapping (batch2_invoice_087.png == invoice_07.png cell row1/col1 == 'Ganesh Provision Store'). Qty/Rate/Amount handwriting in the line-item table is genuinely illegible (overlapping strokes) even at higher resolution via the source collage, so those three columns are left null per the 'null over wrong value' rule rather than guessed. Vendor, bill number, date, customer, item descriptions, and the printed/underlined Total are confidently legible. No separate subtotal/discount/tax line exists on this receipt -- only a single Total row.",
+  "vendor_name": "Ganesh Provision Store",
+  "customer_name": "Ramesh K",
+  "receipt_number": "451",
+  "invoice_number": null,
+  "date": "2022-04-18",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 1370.00,
+  "items": [
+    {"description": "Rice 5kg", "quantity": null, "unit_price": null, "amount": null},
+    {"description": "Toor Dal 1kg", "quantity": null, "unit_price": null, "amount": null},
+    {"description": "Oil 1Ltr", "quantity": null, "unit_price": null, "amount": null},
+    {"description": "Salt 1kg", "quantity": null, "unit_price": null, "amount": null},
+    {"description": "Sugar 1kg", "quantity": null, "unit_price": null, "amount": null}
+  ]
+}

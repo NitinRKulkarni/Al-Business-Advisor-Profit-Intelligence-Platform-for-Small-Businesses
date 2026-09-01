@@ -1,0 +1,10 @@
+filename,original_width,original_height,operations_applied,final_width,final_height,processing_time,status,warnings
+invoice_01.png,1536,1024,grayscale_conversion;denoise,1536,1024,0.0453,success,high_noise;document_boundary_not_found;skew_not_estimable
+invoice_02.png,1536,1024,grayscale_conversion;denoise,1536,1024,0.0406,success,high_noise;skew_not_estimable
+invoice_03.png,1536,1024,grayscale_conversion;denoise;contrast_enhancement,1536,1024,0.0689,success,low_contrast;high_noise;skew_not_estimable
+invoice_04.png,1536,1024,grayscale_conversion;denoise,1536,1024,0.0290,success,high_noise;skew_not_estimable
+invoice_05.png,1536,1024,grayscale_conversion;denoise,1536,1024,0.0285,success,high_noise
+invoice_06.png,1536,1024,perspective_corrected;grayscale_conversion;denoise,1526,1023,0.0546,success,high_noise
+invoice_07.png,1536,1024,perspective_corrected;grayscale_conversion;denoise,1556,729,0.0337,success,high_noise
+invoice_08.png,1536,1024,perspective_corrected;grayscale_conversion;denoise,1522,1044,0.0294,success,high_noise
+invoice_09.png,1536,1024,perspective_corrected;grayscale_conversion;denoise,1507,1024,0.0286,success,high_noise

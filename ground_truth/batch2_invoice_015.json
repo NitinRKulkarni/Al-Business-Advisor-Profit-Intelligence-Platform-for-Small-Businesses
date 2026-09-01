@@ -1,0 +1,23 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_015.png",
+  "category": "skewed_perspective_multi_item_with_discount",
+  "_note": "Spiral-bound notebook receipt photographed at an angle (perspective/skew). Row 3 (Blouse) rate/amount were only confidently resolved as 400 because 1x400 reproduces the printed table Total (4440) exactly; the alternative reading (450) would not. 'Total' in the table (4440) is a pre-discount subtotal; the circled figure below the table (4340) is the actual final payable amount after the '(-) Disc 100' line -- this receipt specifically exercises the 'unlabeled final total is not the same as the labeled Total line' structural case.",
+  "vendor_name": "Varnamm",
+  "customer_name": "Revathi",
+  "receipt_number": "486",
+  "invoice_number": null,
+  "date": "2022-05-15",
+  "subtotal": 4440.00,
+  "discount": 100.00,
+  "tax": null,
+  "total": 4340.00,
+  "items": [
+    {"description": "Salwar Suits", "quantity": 1, "unit_price": 260.00, "amount": 260.00},
+    {"description": "Lining Salwar Suits", "quantity": 1, "unit_price": 200.00, "amount": 200.00},
+    {"description": "Blouse", "quantity": 1, "unit_price": 400.00, "amount": 400.00},
+    {"description": "Lining Blouse", "quantity": 15, "unit_price": 150.00, "amount": 2250.00},
+    {"description": "Pico & Fall", "quantity": 10, "unit_price": 100.00, "amount": 1000.00},
+    {"description": "Stitch & Blouse", "quantity": 1, "unit_price": 250.00, "amount": 250.00},
+    {"description": "Pattern of aari", "quantity": 1, "unit_price": 80.00, "amount": 80.00}
+  ]
+}
