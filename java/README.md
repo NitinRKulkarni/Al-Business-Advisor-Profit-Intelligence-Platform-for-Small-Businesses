@@ -8,20 +8,27 @@
 
 ## 📅 Activity Log & Development History
 
-### **[2026-08-31] — Milestone 2: Asynchronous FIFO Poller & Python AI Service Trigger**
+### **[2026-08-31] — Milestone 2: Asynchronous FIFO Poller, AI Trigger & Bank Statement Engine**
 
-#### **1. Scheduled FIFO Poller (`InvoiceTriggerService`)**
+#### **1. Bank Statement Scheduled Processor & Cross-File Deduplication Engine**
+- Created `BankStatement` entity representing individual transaction rows.
+- Enforced multi-tenant cross-file row deduplication with database unique constraint: `uk_bank_statements_org_txn_dedup (organization_id, txn_date, description, amount, balance)`.
+- Created `BankStatementRepository` with `existsByOrganizationIdAndTxnDateAndDescriptionAndAmountAndBalance(...)`.
+- Implemented `BankStatementProcessingService` annotated with `@Scheduled(fixedDelay = 45000)` (runs every 45s) to parse CSV rows in strict FIFO order, detect and skip duplicate rows across overlapping statement files, and update document status to `COMPLETED`.
+- Updated PostgreSQL `schema.sql` with table DDL, foreign keys, and performance indexes.
+
+#### **2. Invoice Scheduled FIFO Poller (`InvoiceTriggerService`)**
 - Added `@Scheduled(fixedDelay = 30000)` poller executing every 30 seconds to fetch up to 10 oldest `PENDING` invoices (FIFO).
 - Added query method in `DocumentRepository`: `findTop10ByProcessedStatusAndFileTypeOrderByUploadDateAsc(...)`.
 - Immediately transitions status to `PROCESSING` prior to dispatch to prevent duplicate polling in distributed environments.
 
-#### **2. External Python AI Service Integration**
+#### **3. External Python AI Service Integration**
 - Configured dynamic `ai.service.python.base-url` and `ai.service.python.invoice-endpoint` in `application.yml`.
 - Created `AiClientConfig` providing a Spring Boot 3 `RestClient` bean.
 - Implemented fire-and-forget `POST /extract/invoice` with `application/x-www-form-urlencoded` payload containing `document_id`.
 - Added automated fallback error handling: if the Python service fails or is unreachable, the document status is safely updated to `FAILED`.
 
-#### **3. Local Testing Mock (`mock_ai_service.py`)**
+#### **4. Local Testing Mock (`mock_ai_service.py`)**
 - Created a standalone Python HTTP server (`mock_ai_service.py`) on port 8000 simulating the AI service with zero dependencies.
 
 ---

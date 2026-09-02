@@ -44,4 +44,11 @@ Thumbs.db
 .env.*
 !.env.example
 
+### Security & SSH Keys ###
+*.pem
+*.key
+*.cer
+*.crt
+
+
 

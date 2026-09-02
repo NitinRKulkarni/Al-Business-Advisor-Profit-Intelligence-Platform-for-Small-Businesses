@@ -47,6 +47,15 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
         com.omnicfo.model.enums.ProcessedStatus processedStatus,
         com.omnicfo.model.enums.FileType fileType
     );
+
+    /**
+     * Fetch top 5 documents in strict FIFO order (oldest first) matching processed status and file type.
+     */
+    List<Document> findTop5ByProcessedStatusAndFileTypeOrderByUploadDateAsc(
+        com.omnicfo.model.enums.ProcessedStatus processedStatus,
+        com.omnicfo.model.enums.FileType fileType
+    );
 }
+
 
 
