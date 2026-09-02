@@ -1,387 +1,282 @@
 {
-  "customer_enquiries": [
-    {
-      "customer": "Anita Verma",
-      "enquiry": "Inquired about Diwali dry fruit combo packs, their contents, and bulk discounts for 10 boxes."
-    },
-    {
-      "customer": "Deepak Shah",
-      "enquiry": "Enquired about stock availability for Amul butter 500g."
-    },
-    {
-      "customer": "Fatima Sheikh",
-      "enquiry": "Asked if 10kg rice is available at ration card rates."
-    },
-    {
-      "customer": "Geeta Devi",
-      "enquiry": "Asked for 2kg arhar dal, 1kg besan, and 1 packet namak with price discount."
-    },
-    {
-      "customer": "Rajesh Traders",
-      "enquiry": "Asked for monthly supply of 50 packets of Maggi."
-    },
-    {
-      "customer": "Sunita Patil",
-      "enquiry": "Asked if 5 kg atta bag is available."
-    },
-    {
-      "customer": "Vikram Singh",
-      "enquiry": "Asked if the shop keeps cold drinks."
-    }
-  ],
-  "products_services_discussed": [
-    {
-      "item": "500gm dry fruit mix box",
-      "context": "Includes cashew, almond, raisin, and pistachio (kaju, badam, kishmish, pista)."
-    },
-    {
-      "item": "Amul butter 500g",
-      "context": "Customer inquired about stock, price was quoted at 280 rs, and 3 packs were reserved and picked up."
-    },
-    {
-      "item": "Rice (Chawal)",
-      "context": "Customer inquired about ration rate vs market rate, then ordered 10kg at market rate."
-    },
-    {
-      "item": "Arhar dal",
-      "context": "Customer ordered 2kg, priced at 140/kg"
-    },
-    {
-      "item": "Besan",
-      "context": "Customer ordered 1kg, priced at 60/kg"
-    },
-    {
-      "item": "Namak",
-      "context": "Customer ordered 1 packet, priced at 20/packet"
-    },
-    {
-      "item": "Home Delivery",
-      "context": "Promised by 6 PM, delayed to 8 AM next morning due to sick delivery staff"
-    },
-    {
-      "item": "Sugar (Cheeni)",
-      "context": "Customer reported 1kg short weight from yesterday's purchase."
-    },
-    {
-      "item": "Maggi",
-      "context": "Customer negotiated price for bulk monthly supply of a specific brand."
-    },
-    {
-      "item": "Atta (5kg bag)",
-      "context": "Customer inquired about availability and price; owner discounted from 220 rs to 210 rs."
-    },
-    {
-      "item": "Sarson tel (1 litre)",
-      "context": "Customer added 1 litre mustard oil to the order, which was initially missed in delivery."
-    },
-    {
-      "item": "Cold drinks",
-      "context": "Customer asked if available; owner confirmed they do not sell cold drinks."
-    },
-    {
-      "item": "Grocery",
-      "context": "Owner specified that they only sell grocery items."
-    }
-  ],
-  "orders_leads": [
-    {
-      "customer": "Anita Verma",
-      "detail": "Ordered 10 boxes of 500gm dry fruit mix at 400 rs each, to be delivered 2 days before Diwali.",
-      "status": "order"
-    },
-    {
-      "customer": "Deepak Shah",
-      "detail": "Ordered 3 packs of Amul butter 500g for evening pickup.",
-      "status": "order"
-    },
-    {
-      "customer": "Fatima Sheikh",
-      "detail": "10kg rice at market rate (45 rs/kg), total 450 rs for delivery tomorrow.",
-      "status": "order"
-    },
-    {
-      "customer": "Geeta Devi",
-      "detail": "2kg arhar dal, 1kg besan, and 1 packet namak for Rs 360",
-      "status": "order"
-    },
-    {
-      "customer": "Rajesh Traders",
-      "detail": "Monthly order fixed for 100+ packets of specific brand Maggi on the 1st of every month at 11 rs/packet.",
-      "status": "order"
-    },
-    {
-      "customer": "Sunita Patil",
-      "detail": "2 bags of 5kg atta at 210 rs each and 1 litre sarson tel",
-      "status": "order"
-    }
-  ],
-  "prices_amounts": [
-    {
-      "item": "500gm dry fruit mix box (standard)",
-      "amount_text": "450 rs",
-      "amount_numeric": 450
-    },
-    {
-      "item": "500gm dry fruit mix box (bulk rate for 10 boxes)",
-      "amount_text": "400 rs each",
-      "amount_numeric": 400
-    },
-    {
-      "item": "Amul butter 500g",
-      "amount_text": "280 rs",
-      "amount_numeric": 280
-    },
-    {
-      "item": "Rice (per kg)",
-      "amount_text": "45rs/kg",
-      "amount_numeric": 45
-    },
-    {
-      "item": "10kg Rice Total",
-      "amount_text": "450rs total",
-      "amount_numeric": 450
-    },
-    {
-      "item": "Arhar dal",
-      "amount_text": "140/kg",
-      "amount_numeric": 140
-    },
-    {
-      "item": "Besan",
-      "amount_text": "60/kg",
-      "amount_numeric": 60
-    },
-    {
-      "item": "Namak",
-      "amount_text": "20/packet",
-      "amount_numeric": 20
-    },
-    {
-      "item": "Original Total",
-      "amount_text": "380",
-      "amount_numeric": 380
-    },
-    {
-      "item": "Discounted Total",
-      "amount_text": "360",
-      "amount_numeric": 360
-    },
-    {
-      "item": "Maggi (50 packets)",
-      "amount_text": "12 rs/packet",
-      "amount_numeric": 12
-    },
-    {
-      "item": "Maggi (100+ packets)",
-      "amount_text": "11 rs/packet",
-      "amount_numeric": 11
-    },
-    {
-      "item": "Atta 5kg bag (Quoted)",
-      "amount_text": "220 rs",
-      "amount_numeric": 220
-    },
-    {
-      "item": "Atta 5kg bag (Previous price)",
-      "amount_text": "200 rs",
-      "amount_numeric": 200
-    },
-    {
-      "item": "Atta 5kg bag (Discounted final price)",
-      "amount_text": "210 rs",
-      "amount_numeric": 210
-    }
-  ],
-  "customer_requirements": [
-    {
-      "customer": "Anita Verma",
-      "requirement": "Needs 10 gift-ready dry fruit combo boxes ready 2 days before Diwali."
-    },
-    {
-      "customer": "Deepak Shah",
-      "requirement": "Needed 3 packs of Amul butter 500g kept aside for pickup by 5pm."
-    },
-    {
-      "customer": "Fatima Sheikh",
-      "requirement": "Requires 10kg rice delivered tomorrow."
-    },
-    {
-      "customer": "Geeta Devi",
-      "requirement": "Regular customer discount and timely evening home delivery."
-    },
-    {
-      "customer": "Manoj Kumar",
-      "requirement": "Accurate weighing of purchased items and reliable service without repeated errors."
-    },
-    {
-      "customer": "Rajesh Traders",
-      "requirement": "Requires delivery on the 1st of every month."
-    },
-    {
-      "customer": "Rajesh Traders",
-      "requirement": "Requires a specific brand of Maggi as shown in photo."
-    },
-    {
-      "customer": "Sunita Patil",
-      "requirement": "Requires 2 bags of 5kg atta and 1 litre of sarson tel delivered to home."
-    },
-    {
-      "customer": "Vikram Singh",
-      "requirement": "Wants to buy cold drinks."
-    }
-  ],
-  "complaints_negative_feedback": [
-    {
-      "customer": "Geeta Devi",
-      "issue": "Order not delivered by promised 6 PM evening deadline; customer mentioned this repeat delay happened previously as well.",
-      "severity": "medium"
-    },
-    {
-      "customer": "Manoj Kumar",
-      "issue": "Received 1kg less sugar than bought; mentioned this is the third time a weight issue has happened.",
-      "severity": "high"
-    },
-    {
-      "customer": "Sunita Patil",
-      "issue": "1 litre sarson tel was missing from the delivered package.",
-      "severity": "medium"
-    }
-  ],
-  "action_items": [
-    {
-      "action": "Prepare and keep ready 10 dry fruit mix boxes for Anita Verma 2 days before Diwali.",
-      "owner": "shop",
-      "priority": "high"
-    },
-    {
-      "action": "Keep 3 packs of Amul butter 500g ready by 5pm for pickup",
-      "owner": "shop",
-      "priority": "medium"
-    },
-    {
-      "action": "Deliver 10kg rice (450 rs) to Fatima Sheikh tomorrow.",
-      "owner": "shop",
-      "priority": "medium"
+  "items": [
+    {
+      "item_name": "dry fruits combo pack",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:32",
+      "description": "Inquiry for Diwali combo pack"
     },
-    {
-      "action": "Ensure order is delivered to Geeta Devi by 8:00 AM next morning",
-      "owner": "shop",
-      "priority": "high"
-    },
-    {
-      "action": "Check and calibrate weighing machine immediately",
-      "owner": "shop",
-      "priority": "high"
+    {
+      "item_name": "mix box",
+      "quantity": 500,
+      "quantity_unit": "gm",
+      "date": "18/06/24",
+      "timestamp": "15:40",
+      "description": "Offered for 450 rs"
     },
-    {
-      "action": "Provide extra 1kg free sugar on Manoj Kumar's next order",
-      "owner": "shop",
-      "priority": "medium"
+    {
+      "item_name": "Kaju",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Included in dry fruit mix box"
     },
-    {
-      "action": "Schedule monthly supply of 100+ packets of the requested Maggi brand for the 1st of every month for Rajesh Traders.",
-      "owner": "shop",
-      "priority": "high"
+    {
+      "item_name": "badam",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Included in dry fruit mix box"
     },
-    {
-      "action": "Deliver missing 1 litre sarson tel to Sunita Patil next morning.",
-      "owner": "shop",
-      "priority": "high"
+    {
+      "item_name": "kishmish",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Included in dry fruit mix box"
     },
-    {
-      "action": "Verify all items against order details before sending delivery.",
-      "owner": "shop",
-      "priority": "medium"
-    }
-  ],
-  "customer_sentiment": [
-    {
-      "customer": "Anita Verma",
-      "sentiment": "positive",
-      "reason": "Pleased with the offered bulk discount and confirmed the order smoothly."
+    {
+      "item_name": "pista",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Included in dry fruit mix box"
     },
-    {
-      "customer": "Deepak Shah",
-      "sentiment": "positive",
-      "reason": "Customer appreciated product quality and successful pickup."
+    {
+      "item_name": "box",
+      "quantity": 10,
+      "quantity_unit": "box",
+      "date": "18/06/24",
+      "timestamp": "15:46",
+      "description": "Requested for gift with bulk discount request"
     },
-    {
-      "customer": "Fatima Sheikh",
-      "sentiment": "neutral",
-      "reason": "Accepted the standard market rate of 45 rs/kg without hesitation after being informed ration rates aren't applicable."
+    {
+      "item_name": "box",
+      "quantity": 10,
+      "quantity_unit": "box",
+      "date": "18/06/24",
+      "timestamp": "15:50",
+      "description": "Offered at discounted price of 400 rs each"
     },
-    {
-      "customer": "Geeta Devi",
-      "sentiment": "negative",
-      "reason": "Upset due to unfulfilled delivery timeline and repeated delivery delay excuse."
+    {
+      "item_name": "Amul butter 500g",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "19/06/24",
+      "timestamp": "10:02",
+      "description": "Customer inquiring about stock"
     },
-    {
-      "customer": "Manoj Kumar",
-      "sentiment": "negative",
-      "reason": "Upset about repeated short weight issues (third time) and threatened to switch shops if it happens again."
+    {
+      "item_name": "Amul butter 500g",
+      "quantity": 3,
+      "quantity_unit": "packs",
+      "date": "19/06/24",
+      "timestamp": "10:06",
+      "description": "Requested to keep aside for evening pickup"
     },
-    {
-      "customer": "Rajesh Traders",
-      "sentiment": "positive",
-      "reason": "Agreed on bulk pricing discount (11 rs/packet for 100+ packets) and confirmed recurring monthly order."
+    {
+      "item_name": "chawal",
+      "quantity": 10,
+      "quantity_unit": "kg",
+      "date": "20/06/24",
+      "timestamp": "09:16:05",
+      "description": "asking for ration card rate"
     },
-    {
-      "customer": "Sunita Patil",
-      "sentiment": "mixed",
-      "reason": "Appreciated the discount and polite response, but was unhappy about the price increase and missing item in the delivery."
+    {
+      "item_name": "chawal",
+      "quantity": 10,
+      "quantity_unit": "kg",
+      "date": "20/06/24",
+      "timestamp": "09:22:00",
+      "description": "ordered at market rate"
     },
-    {
-      "customer": "Vikram Singh",
-      "sentiment": "neutral",
-      "reason": "Customer politely acknowledged the shop does not carry cold drinks."
-    }
-  ],
-  "business_recommendations": [
-    {
-      "recommendation": "Promote festive bulk gifting packages with upfront tiered discount options.",
-      "why": "Customers actively seek bulk discounts for festival gifting."
+    {
+      "item_name": "dal arhar wali",
+      "quantity": 2,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
     },
-    {
-      "recommendation": "Maintain steady inventory of fresh dairy staples like Amul butter 500g.",
-      "why": "High-demand essentials drive repeat customer visits and hold-for-pickup requests."
+    {
+      "item_name": "besan",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
     },
-    {
-      "recommendation": "Offer a budget/economy variety of rice for price-conscious customers asking for low rates.",
-      "why": "Fatima Sheikh initially sought ration card rates, indicating interest in lower-cost staple options."
+    {
+      "item_name": "namak",
+      "quantity": 1,
+      "quantity_unit": "packet",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
     },
-    {
-      "recommendation": "Proactively inform customers about delivery delays before deadline passes.",
-      "why": "Waiting for the customer to follow up after a missed promise damages customer trust."
+    {
+      "item_name": "Arhar dal",
+      "quantity": null,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Price quoted at 140 per kg"
     },
-    {
-      "recommendation": "Arrange backup delivery arrangements when regular delivery personnel are absent.",
-      "why": "Prevents repeated delivery failures for loyal customers like Geeta Devi."
+    {
+      "item_name": "besan",
+      "quantity": null,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Price quoted at 60 per kg"
     },
-    {
-      "recommendation": "Perform regular maintenance and daily calibration checks on all weighing machines.",
-      "why": "Repeated quantity errors severely damage customer trust and lead to churn."
+    {
+      "item_name": "namak",
+      "quantity": null,
+      "quantity_unit": "packet",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Price quoted at 20 per packet"
     },
-    {
-      "recommendation": "Set a monthly reminder for the 1st of each month to pack and deliver the specific Maggi brand order for Rajesh Traders.",
-      "why": "Customer committed to a recurring monthly order dependent on timely delivery on the 1st."
+    {
+      "item_name": "cheeni",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "17/06/24",
+      "timestamp": "08:02",
+      "description": "1kg short in weight"
     },
-    {
-      "recommendation": "Implement an order verification checklist prior to dispatch.",
-      "why": "Prevents incomplete deliveries and maintains customer trust."
+    {
+      "item_name": "cheeni",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "17/06/24",
+      "timestamp": "08:15",
+      "description": "Offered 1kg extra free on next order"
     },
-    {
-      "recommendation": "Proactively notify regular customers about wholesale price changes for basic staples.",
-      "why": "Helps manage price expectations and minimizes negotiation friction."
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:05",
+      "description": "Monthly supply requirement"
     },
-    {
-      "recommendation": "Consider stocking popular cold drink brands.",
-      "why": "Customer demand exists for cold drinks, which could increase overall daily store sales."
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:10",
+      "description": "Rate quoted at 12 rs per packet"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "",
+      "date": "16/06/24",
+      "timestamp": "11:12",
+      "description": "Requesting 11 rs rate for quantity above 50"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 100,
+      "quantity_unit": "",
+      "date": "16/06/24",
+      "timestamp": "11:15",
+      "description": "Offered 11 rs rate for quantity 100+"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "date": "15/06/24",
+      "timestamp": "09:14",
+      "description": "Customer asked if available"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "date": "15/06/24",
+      "timestamp": "09:20",
+      "description": "Owner quoted 220 rs per 5kg bag"
+    },
+    {
+      "item_name": "wheat",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "09:25",
+      "description": "Owner mentioned price rise and offered 210 rs rate"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 2,
+      "quantity_unit": "bag",
+      "date": "15/06/24",
+      "timestamp": "09:26",
+      "description": "Customer ordered 2 bags"
+    },
+    {
+      "item_name": "sarson tel",
+      "quantity": 1,
+      "quantity_unit": "litre",
+      "date": "15/06/24",
+      "timestamp": "09:26",
+      "description": "Customer added to order"
+    },
+    {
+      "item_name": "tel",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "18:40",
+      "description": "Customer reported missing from delivery"
+    },
+    {
+      "item_name": "atta",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "18:40",
+      "description": "Customer confirmed received in delivery"
+    },
+    {
+      "item_name": "cold drink",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:02",
+      "description": "Customer asking if available"
+    },
+    {
+      "item_name": "grocery",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:05",
+      "description": "Owner stated they only keep grocery"
+    },
+    {
+      "item_name": "cold drink",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:05",
+      "description": "Owner stated they do not keep cold drink"
     }
   ],
   "_meta": {
     "source_file": "kirana_export_full_parsed.json",
     "total_messages_analyzed": 58,
-    "generated_at": "2026-09-01T06:10:38.726484Z",
+    "generated_at": "2026-09-02T18:33:11.113669Z",
     "model": "gemini-3.6-flash"
   }
 }
