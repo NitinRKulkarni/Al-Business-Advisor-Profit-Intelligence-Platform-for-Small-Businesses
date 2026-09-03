@@ -7,12 +7,14 @@ export const DEFAULT_TENANT_ID = 'a0000000-0000-0000-0000-000000000001'
  * - PDF invoices → Invoice
  * - Invoice images → Invoice
  * - Inventory CSV → Inventory
+ * - WhatsApp ZIP export → WhatsAppChat
  */
 export const CATEGORY_FILE_TYPE_MAP = {
   bank: 'BankStmt',
   invoices: 'Invoice',
   images: 'Invoice',
   inventory: 'Inventory',
+  whatsapp: 'WhatsAppChat',
 }
 
 /**
@@ -53,7 +55,7 @@ export async function uploadDocument(file, fileType, tenantId = DEFAULT_TENANT_I
  * Uploads all staged files across all upload categories to the backend.
  * Skips empty categories and frontend-only categories.
  * 
- * @param {Object} uploadsState - { bank: File[], invoices: File[], images: File[], inventory: File[] }
+ * @param {Object} uploadsState - { bank: File[], invoices: File[], images: File[], inventory: File[], whatsapp: File[] }
  * @param {string} tenantId - Organization UUID
  * @returns {Promise<{ successes: Array, errors: Array }>} Summary of upload results
  */

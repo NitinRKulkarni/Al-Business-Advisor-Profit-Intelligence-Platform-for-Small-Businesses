@@ -6,6 +6,7 @@ const initialUploads = {
   invoices: [],
   images: [],
   inventory: [],
+  whatsapp: [],
 }
 
 const uploadConfigs = {
@@ -586,21 +587,109 @@ function UploadCard({ config, files, onFiles, onRemove, onReplace, error, compac
   )
 }
 
-function WhatsAppCard({ value, onChange, onClear }) {
-  const maxLength = 5000
+function WhatsAppCard({ file, onFile, onClear, status, error }) {
+  const inputRef = useRef(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const statusLabels = {
+    idle: 'Not added',
+    ready: 'Ready to upload',
+    processing: 'Processing...',
+    success: 'Success',
+    error: 'Error',
+  }
+
+  const handleFiles = (incoming) => {
+    const selected = Array.from(incoming || [])
+    const candidate = selected[0]
+    const isZip = candidate && candidate.name.toLowerCase().endsWith('.zip')
+    if (!candidate || !isZip) {
+      onFile(null, 'Please choose a WhatsApp export .zip file.')
+    } else {
+      onFile(candidate, '')
+    }
+    if (inputRef.current) inputRef.current.value = ''
+  }
+
   return (
     <article className="upload-card whatsapp-card accent-teal">
       <div className="card-heading">
         <div className="heading-icon"><Icon name="whatsapp" size={22} /></div>
-        <div><h3>WhatsApp chats</h3><p>Paste customer conversations to spot recurring questions.</p></div>
-        <span className={`card-status ${value.trim() ? 'has-files' : ''}`}><span />{value.trim() ? 'Added' : 'Not added'}</span>
+        <div><h3>WhatsApp chat export</h3><p>Upload a .zip export containing one chat file per customer.</p></div>
+        <span className={`card-status ${file ? 'has-files' : ''}`}><span />{statusLabels[status] || statusLabels.idle}</span>
       </div>
-      <div className="chat-input-wrap">
-        <textarea value={value} onChange={(event) => onChange(event.target.value.slice(0, maxLength))} placeholder="Paste your WhatsApp conversation here..." maxLength={maxLength} aria-label="WhatsApp chat content" />
-        <div className="textarea-footer"><span><Icon name="message" size={14} /> Plain text is supported</span><span className={value.length >= maxLength ? 'limit-reached' : ''}>{value.length.toLocaleString()} / {maxLength.toLocaleString()}</span></div>
+      <div className="upload-content">
+        {!file ? (
+          <div
+            className={`drop-zone ${isDragging ? 'dragging' : ''}`}
+            onDragOver={(event) => { event.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(event) => { event.preventDefault(); setIsDragging(false); handleFiles(event.dataTransfer.files) }}
+            onClick={() => inputRef.current?.click()}
+            role="button"
+            tabIndex="0"
+            onKeyDown={(event) => event.key === 'Enter' && inputRef.current?.click()}
+          >
+            <div className="drop-icon"><Icon name="upload" size={20} /></div>
+            <div><strong>Drop a ZIP here or <button type="button" onClick={(event) => { event.stopPropagation(); inputRef.current?.click() }}>browse</button></strong><small>.zip WhatsApp export only</small></div>
+          </div>
+        ) : (
+          <div className="file-list">
+            <FileRow file={file} onRemove={onClear} onReplace={() => inputRef.current?.click()} />
+          </div>
+        )}
+        <input
+          ref={inputRef}
+          className="visually-hidden"
+          type="file"
+          accept=".zip,application/zip,application/x-zip-compressed"
+          onChange={(event) => handleFiles(event.target.files)}
+        />
+        {error && <p className="validation-error"><Icon name="help" size={14} />{error}</p>}
       </div>
-      <button type="button" className="clear-button" onClick={onClear} disabled={!value}><Icon name="trash" size={14} /> Clear chat</button>
+      <button type="button" className="clear-button" onClick={onClear} disabled={!file || status === 'processing'}><Icon name="trash" size={14} /> Clear ZIP</button>
     </article>
+  )
+}
+
+function WhatsAppItemsTable({ items }) {
+  if (!items.length) return null
+
+  return (
+    <section className="invoices-card whatsapp-results-card">
+      <div className="section-header">
+        <div>
+          <span className="section-kicker">WhatsApp extraction results</span>
+          <h2>Extracted items</h2>
+        </div>
+        <span className="count-pill green">{items.length} items</span>
+      </div>
+      <div className="table-responsive">
+        <table className="invoices-table">
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Unit</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, index) => (
+              <tr key={`${item.item_name || 'item'}-${index}`}>
+                <td className="inv-customer"><strong>{item.item_name || '—'}</strong></td>
+                <td>{item.quantity ?? '—'}</td>
+                <td>{item.quantity_unit || '—'}</td>
+                <td className="inv-date">{item.date || '—'}</td>
+                <td className="inv-date">{item.timestamp || '—'}</td>
+                <td>{item.description || '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   )
 }
 
@@ -608,7 +697,9 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [uploads, setUploads] = useState(initialUploads)
   const [errors, setErrors] = useState({})
-  const [chats, setChats] = useState('')
+  const [whatsappItems, setWhatsappItems] = useState([])
+  const [whatsappStatus, setWhatsappStatus] = useState('idle')
+  const [whatsappError, setWhatsappError] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [mobileNav, setMobileNav] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
@@ -673,29 +764,45 @@ function App() {
   }
 
   const removeFile = (key, index) => updateFiles(key, uploads[key].filter((_, itemIndex) => itemIndex !== index))
+  const setWhatsAppFile = (file, error = '') => {
+    updateFiles('whatsapp', file ? [file] : [], error)
+    setWhatsappError(error)
+    setWhatsappItems([])
+    setWhatsappStatus(error ? 'error' : file ? 'ready' : 'idle')
+  }
   const totalFiles = Object.values(uploads).reduce((total, files) => total + files.length, 0)
-  const dataPoints = totalFiles + (chats.trim() ? 1 : 0)
+  const dataPoints = totalFiles
 
   const [isUploading, setIsUploading] = useState(false)
 
   const handleSubmit = async () => {
     if (totalFiles === 0) {
-      if (chats.trim()) {
-        setSubmitted(true)
-        setToastMessage('WhatsApp context saved locally.')
-        setTimeout(() => setToastMessage(''), 4000)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      } else {
-        setToastMessage('Please select at least one document to upload.')
-        setTimeout(() => setToastMessage(''), 4000)
-      }
+      setToastMessage('Please select at least one document to upload.')
+      setTimeout(() => setToastMessage(''), 4000)
       return
+    }
+
+    const hasWhatsAppUpload = uploads.whatsapp.length > 0
+    if (hasWhatsAppUpload) {
+      setWhatsappStatus('processing')
+      setWhatsappError('')
     }
 
     setIsUploading(true)
     try {
       const results = await uploadAllDocuments(uploads)
       const newErrors = { ...errors }
+      const whatsappSuccess = results.successes.find((item) => item.category === 'whatsapp')
+      const whatsappFailure = results.errors.find((item) => item.category === 'whatsapp')
+
+      if (whatsappSuccess) {
+        const items = Array.isArray(whatsappSuccess.response?.items) ? whatsappSuccess.response.items : []
+        setWhatsappItems(items)
+        setWhatsappStatus('success')
+      } else if (whatsappFailure) {
+        setWhatsappStatus('error')
+        setWhatsappError(whatsappFailure.error)
+      }
 
       if (results.errors.length > 0) {
         results.errors.forEach((errItem) => {
@@ -714,12 +821,16 @@ function App() {
       if (results.successes.length > 0) {
         setSubmitted(true)
         if (results.errors.length === 0) {
-          setToastMessage(`Successfully uploaded ${results.successes.length} file(s) to backend!`)
+          setToastMessage(`Successfully processed ${results.successes.length} file(s) in the backend.`)
         }
       }
       await fetchBackendDocuments()
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
+      if (hasWhatsAppUpload) {
+        setWhatsappStatus('error')
+        setWhatsappError(err.message)
+      }
       setToastMessage(`Backend upload failed: ${err.message}`)
     } finally {
       setIsUploading(false)
@@ -1186,7 +1297,7 @@ function App() {
                   <div className="success-icon"><Icon name="check" size={18} /></div>
                   <div>
                     <strong>Organization data updated</strong>
-                    <span>Everything has been saved locally for your organization dashboard.</span>
+                    <span>Everything has been uploaded through the backend and processed results appear below.</span>
                   </div>
                   <button type="button" onClick={() => setSubmitted(false)} aria-label="Dismiss success message"><Icon name="close" size={16} /></button>
                 </div>
@@ -1247,12 +1358,20 @@ function App() {
                 <span className="required-note"><i /> Optional</span>
               </div>
 
-              <WhatsAppCard value={chats} onChange={(value) => { setChats(value); setSubmitted(false) }} onClear={() => setChats('')} />
+              <WhatsAppCard
+                file={uploads.whatsapp[0] || null}
+                onFile={setWhatsAppFile}
+                onClear={() => setWhatsAppFile(null)}
+                status={whatsappStatus}
+                error={whatsappError}
+              />
+
+              <WhatsAppItemsTable items={whatsappItems} />
 
               <div className="submit-row">
                 <div className="submit-note">
                   <Icon name="shield" size={16} />
-                  <span><strong>Frontend Only.</strong> All values remain strictly within your local browser context.</span>
+                  <span><strong>Secure backend processing.</strong> The ZIP is sent to the existing backend upload service and Gemini credentials stay on the server.</span>
                 </div>
                 <button type="button" className="submit-button" onClick={handleSubmit} disabled={isUploading}>
                   {isUploading ? 'Uploading to Backend...' : 'Update Dashboard Data'} <Icon name="arrow" size={17} />
