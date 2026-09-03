@@ -1,32 +1,29 @@
-# WhatsApp Chat → Business Insights Module
+# WhatsApp Chat → Item Extraction Module
 
 **Owner:** Darshan | **Status:** v1 complete and tested
 
 ## What this does
 
 Takes a ZIP of exported WhatsApp chats (one `.txt` file per customer) and
-produces a single structured JSON file of business insights — customer
-enquiries, orders/leads, prices, complaints, action items, sentiment, and
-recommendations. Built for informal/unstructured business data, as opposed
-to formal invoices or bank statements (separate modules, owned by others).
+produces a structured JSON list of every item mentioned across the chats —
+item name, quantity, unit, date, timestamp, and a short description.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `parser.py` | Unzips per-customer chat exports, cleans and structures raw messages into JSON. No API calls, runs locally, free. |
-| `extractor_gemini.py` | Sends parsed messages to Gemini (`gemini-3.6-flash`) and produces `insights.json`. Requires `GEMINI_API_KEY`. |
-| `extractor.py` | Same as above but for Claude (`claude-sonnet-4-5-20250929`). Requires `ANTHROPIC_API_KEY`. Use whichever provider has available credits. |
-| `dashboard.html` | Standalone viewer — open in any browser, load `insights.json`, no server needed. For demo/QA only, not meant to be the production UI. |
+| `extractor_gemini.py` | Sends parsed messages to Gemini (`gemini-3.6-flash`) and produces `insights.json`. Requires `GEMINI_API_KEY`. Includes automatic retry (up to 4 attempts, exponential backoff) on transient server errors. |
+| `extractor.py` | Same idea but for Claude (`claude-sonnet-4-5-20250929`). Requires `ANTHROPIC_API_KEY`. Use whichever provider has available credits. |
 
 ## How to run
 
 ```bash
-pip install anthropic google-genai      # only need whichever provider you're using
-export GEMINI_API_KEY="..."             # or ANTHROPIC_API_KEY
+pip install google-genai      # or anthropic, depending on provider
+export GEMINI_API_KEY="..."   # or ANTHROPIC_API_KEY
 
-python parser.py your_chat_export.zip           # -> your_chat_export_parsed.json
-python extractor_gemini.py your_chat_export_parsed.json   # -> insights.json
+python parser.py your_chat_export.zip                      # -> your_chat_export_parsed.json
+python extractor_gemini.py your_chat_export_parsed.json    # -> insights.json
 ```
 
 Input ZIP format: one `.txt` file per customer, filename = customer name,
@@ -37,39 +34,47 @@ standard WhatsApp chat export format (both Android `date, time -` and iOS
 
 ```json
 {
-  "customer_enquiries": [ { "customer": "", "enquiry": "" } ],
-  "products_services_discussed": [ { "item": "", "context": "" } ],
-  "orders_leads": [ { "customer": "", "detail": "", "status": "order" | "lead" } ],
-  "prices_amounts": [ { "item": "", "amount_text": "", "amount_numeric": null } ],
-  "customer_requirements": [ { "customer": "", "requirement": "" } ],
-  "complaints_negative_feedback": [ { "customer": "", "issue": "", "severity": "low" | "medium" | "high" } ],
-  "action_items": [ { "action": "", "owner": "shop" | "customer", "priority": "low" | "medium" | "high" } ],
-  "customer_sentiment": [ { "customer": "", "sentiment": "positive" | "neutral" | "negative" | "mixed", "reason": "" } ],
-  "business_recommendations": [ { "recommendation": "", "why": "" } ],
+  "items": [
+    {
+      "item_name": "",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "",
+      "timestamp": "",
+      "description": ""
+    }
+  ],
   "_meta": { "source_file": "", "total_messages_analyzed": 0, "generated_at": "", "model": "" }
 }
 ```
 
-Empty categories return `[]`, never `null` or omitted keys — safe to iterate
-without null-checks downstream.
+- `item_name` — product/item as mentioned in the chat
+- `quantity` — number if stated, else `null`
+- `quantity_unit` — unit as stated (kg, packet, litre, etc.), else `""`
+- `date` / `timestamp` — taken directly from the chat message's own date/time, kept in the same format as the original export
+- `description` — short free-text context (price, condition, notes)
+
+One entry per item per mention — a single order/message can produce multiple
+entries (e.g. a mixed dry-fruit box gets broken into its individual
+components).
 
 ## Known open item — needs team decision
 
-Two of the shared architecture docs define different destinations for this
-output: `design_doc.md`'s `WHATSAPP_CHAT` table (raw messages only, no
-insights table) vs `data_specification.md`'s `chat_logs.extracted_intent`
-JSONB field (per-message, not per-batch). This module currently just
-produces standalone `insights.json` — **whoever picks this up next needs to
-confirm which table/field this maps to** before wiring it into the DB layer.
+Two of the shared architecture docs define different destinations for chat
+data: `design_doc.md`'s `WHATSAPP_CHAT` table (raw messages only) vs
+`data_specification.md`'s `chat_logs.extracted_intent` JSONB field
+(per-message). This module produces standalone `insights.json` —
+**whoever picks this up next needs to confirm which table/field this maps
+to** before wiring it into the DB layer.
 
 ## Tested against
 
-- 8 synthetic customers, 58 messages, Hinglish + English, Android + iOS
-  export formats, multi-line messages, price haggling, repeat complaints,
-  bulk orders, enquiry-with-no-purchase — all validated correct in manual
-  spot-checks (see conversation history / demo for specifics).
+8 synthetic customers, 58 messages, Hinglish + English, Android + iOS export
+formats, multi-line messages, price haggling, bulk orders — output manually
+spot-checked correct (see `insights_sample_output.json` for a real example).
 
-## Not yet built
+## Scope note
 
-Handwritten bill image extraction (separate input type, vision-based,
-planned for next).
+Handwritten bill image extraction is **not** part of this module — confirmed
+with mentor that this module covers WhatsApp chats only; handwritten bills
+are being handled by another teammate.

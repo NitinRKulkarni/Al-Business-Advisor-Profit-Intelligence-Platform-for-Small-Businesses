@@ -1,40 +1,38 @@
 import json
 import sys
 import os
+import time
 from datetime import datetime
 from google import genai
+from google.genai import errors as genai_errors
 
 MODEL = "gemini-3.6-flash"
 CHUNK_SIZE = 80
 
-SYSTEM_PROMPT = """You are a business analyst assistant. You read WhatsApp conversations between a small
-business owner and their customers, and extract structured business intelligence.
+SYSTEM_PROMPT = """You are a data-entry assistant. You read WhatsApp conversations between a small
+business owner and their customers, and extract every item mentioned in the chat.
 
 Always respond with ONLY valid JSON matching the schema given in the user message. No preamble,
 no markdown code fences, no explanation text before or after the JSON.
 
 Rules:
 - Only extract what is actually present in the chat. Do not invent data.
-- Amounts/prices should be extracted as they appear (e.g. "799 rs", "$50"), plus a normalized number if possible.
-- sentiment must be one of: "positive", "neutral", "negative", "mixed"
-- If a category has nothing relevant, return an empty array for it.
-- Keep each insight item short (1-2 sentences) and specific — cite the customer name when known.
+- List every distinct item mentioned, one entry per item per mention.
 """
 
 JSON_SCHEMA_INSTRUCTIONS = """
 Return a JSON object with exactly this shape:
 
 {
-  "customer_enquiries": [ { "customer": "", "enquiry": "" } ],
-  "products_services_discussed": [ { "item": "", "context": "" } ],
-  "orders_leads": [ { "customer": "", "detail": "", "status": "order" | "lead" } ],
-  "prices_amounts": [ { "item": "", "amount_text": "", "amount_numeric": null } ],
-  "customer_requirements": [ { "customer": "", "requirement": "" } ],
-  "complaints_negative_feedback": [ { "customer": "", "issue": "", "severity": "low" | "medium" | "high" } ],
-  "action_items": [ { "action": "", "owner": "shop" | "customer", "priority": "low" | "medium" | "high" } ],
-  "customer_sentiment": [ { "customer": "", "sentiment": "positive" | "neutral" | "negative" | "mixed", "reason": "" } ],
-  "business_recommendations": [ { "recommendation": "", "why": "" } ]
+  "items": [ { "item_name": "", "quantity": null, "quantity_unit": "", "date": "", "timestamp": "", "description": "" } ]
 }
+
+- item_name: the product name as mentioned (e.g. "atta", "kurta", "Maggi")
+- quantity: the numeric quantity if stated (e.g. 5), null if not stated
+- quantity_unit: the unit as stated (e.g. "kg", "packet", "litre", "piece"), "" if not stated
+- date: the message's date (from the chat line), in the same format as it appears in the chat
+- timestamp: the message's time (from the chat line), in the same format as it appears in the chat
+- description: any other relevant detail about this item mention (price, condition, context) in 1 short phrase
 """
 
 
@@ -50,7 +48,7 @@ def format_chat_for_prompt(messages):
     return "\n".join(lines)
 
 
-def extract_insights(client, chat_chunk):
+def extract_insights(client, chat_chunk, max_retries=4):
     chat_text = format_chat_for_prompt(chat_chunk)
     user_prompt = f"""Here is a WhatsApp business chat to analyze:
 
@@ -60,14 +58,26 @@ def extract_insights(client, chat_chunk):
 
 {JSON_SCHEMA_INSTRUCTIONS}
 """
-    response = client.models.generate_content(
-        model=MODEL,
-        contents=user_prompt,
-        config={
-            "system_instruction": SYSTEM_PROMPT,
-            "response_mime_type": "application/json",
-        },
-    )
+    response = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.models.generate_content(
+                model=MODEL,
+                contents=user_prompt,
+                config={
+                    "system_instruction": SYSTEM_PROMPT,
+                    "response_mime_type": "application/json",
+                },
+            )
+            break
+        except genai_errors.ServerError as e:
+            wait = 2 ** attempt  # 2, 4, 8, 16 seconds
+            print(f"    Server busy (attempt {attempt}/{max_retries}), retrying in {wait}s...")
+            if attempt == max_retries:
+                print(f"    Giving up on this chunk after {max_retries} attempts: {e}")
+                return empty_result()
+            time.sleep(wait)
+
     raw_text = response.text.strip()
     if raw_text.startswith("```"):
         raw_text = raw_text.strip("`")
@@ -82,11 +92,7 @@ def extract_insights(client, chat_chunk):
 
 
 def empty_result():
-    return {
-        "customer_enquiries": [], "products_services_discussed": [], "orders_leads": [],
-        "prices_amounts": [], "customer_requirements": [], "complaints_negative_feedback": [],
-        "action_items": [], "customer_sentiment": [], "business_recommendations": [],
-    }
+    return {"items": []}
 
 
 def merge_results(results):
