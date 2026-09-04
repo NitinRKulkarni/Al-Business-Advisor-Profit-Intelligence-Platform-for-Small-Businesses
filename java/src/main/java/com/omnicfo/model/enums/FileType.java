@@ -10,9 +10,12 @@ import java.util.Arrays;
  */
 public enum FileType {
     INVOICE("Invoice"),
+    INVOICE_PDF("InvoicePdf"),
+    INVOICE_IMAGE("InvoiceImage"),
     WHATSAPP_CHAT("WhatsAppChat"),
     BANK_STMT("BankStmt"),
-    INVENTORY("Inventory");
+    INVENTORY("Inventory"),
+    CSV_INVENTORY("CsvInventory");
 
     private final String displayName;
 

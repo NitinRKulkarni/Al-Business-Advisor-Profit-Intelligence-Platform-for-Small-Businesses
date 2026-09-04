@@ -1,0 +1,20 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_034.png",
+  "category": "heldout_clean_printed_units_in_qty",
+  "_note": "HELD-OUT evaluation receipt: transcribed AFTER the implementation was finished, never used to tune any threshold, regex, weight or gate. Image-to-file mapping was verified by opening THIS image on its own (an earlier version of this file described a different receipt because three images were reviewed together and got rotated). 'Bill / Cash Memo' combined header. Quantities carry mixed units (kg / dozen / gm / pc), so a bare quantity number is not always meaningful. Internally consistent: 160+60+80+50 = 350 = printed Total. No subtotal/discount/tax lines exist on this receipt.",
+  "vendor_name": "Fresh Fruits Mart",
+  "customer_name": "Local Customer",
+  "receipt_number": "190",
+  "invoice_number": null,
+  "date": "2024-06-07",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 350.00,
+  "items": [
+    {"description": "Apple", "quantity": 1, "unit_price": 160.00, "amount": 160.00},
+    {"description": "Banana", "quantity": 1, "unit_price": 60.00, "amount": 60.00},
+    {"description": "Grapes", "quantity": 500, "unit_price": 80.00, "amount": 80.00},
+    {"description": "Papaya", "quantity": 1, "unit_price": 50.00, "amount": 50.00}
+  ]
+}

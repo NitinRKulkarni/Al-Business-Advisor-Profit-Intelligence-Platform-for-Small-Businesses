@@ -12,10 +12,6 @@ import java.util.UUID;
 @Repository
 public interface BankStatementRepository extends JpaRepository<BankStatement, UUID> {
 
-    /**
-     * Checks if a transaction row with identical attributes already exists for the organization.
-     * Prevents duplicate insertions across overlapping bank statement files.
-     */
     boolean existsByOrganizationIdAndTxnDateAndDescriptionAndAmountAndBalance(
         UUID organizationId,
         LocalDate txnDate,
@@ -24,8 +20,9 @@ public interface BankStatementRepository extends JpaRepository<BankStatement, UU
         BigDecimal balance
     );
 
-    /**
-     * Retrieves all bank statement transactions for a specific tenant.
-     */
     List<BankStatement> findByOrganizationIdOrderByTxnDateDesc(UUID organizationId);
+
+    List<BankStatement> findByOrganizationIdAndReconciliationStatus(UUID organizationId, String reconciliationStatus);
+
+    List<BankStatement> findByOrganizationIdAndReconciliationStatusAndTxnType(UUID organizationId, String reconciliationStatus, String txnType);
 }

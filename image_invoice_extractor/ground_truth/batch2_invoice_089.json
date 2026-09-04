@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_089.png",
+  "category": "clean_printed_wholesale_no_qty_decimal",
+  "_note": "Different layout from the 'Cash Memo' style dominating this dataset -- 'Kaveri Traders' wholesale dealer receipt, printed header, amounts written without decimal points (1350 not 1350.00), Total labeled with a trailing '-' ('4350/-') and no discount/tax lines at all. Added to broaden layout coverage beyond the cash-memo template.",
+  "vendor_name": "Kaveri Traders",
+  "customer_name": "S. Kumar",
+  "receipt_number": "116",
+  "invoice_number": null,
+  "date": "2022-04-23",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 4350.00,
+  "items": [
+    {"description": "Groundnut Oil (5 Ltr)", "quantity": 1, "unit_price": 1350.00, "amount": 1350.00},
+    {"description": "Sunflower Oil (5 Ltr)", "quantity": 1, "unit_price": 1450.00, "amount": 1450.00},
+    {"description": "Mustard Oil (5 Ltr)", "quantity": 1, "unit_price": 1550.00, "amount": 1550.00}
+  ]
+}

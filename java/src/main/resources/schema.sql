@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS organizations (
 -- ==============================================================================
 -- Table: documents
 -- Stores uploaded financial documents and ingestion metadata per tenant.
+-- In-database BLOB storage (file_data) for self-contained testing.
 -- Deduplication is enforced per tenant using (organization_id, file_hash).
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS documents (
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS documents (
     file_name VARCHAR(255) NOT NULL,
     file_type VARCHAR(50) NOT NULL,
     file_hash VARCHAR(64) NOT NULL,
+    file_data BYTEA,
     processed_status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     upload_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -42,10 +44,71 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 
 -- ==============================================================================
+-- Table: invoices
+-- Stores structured invoice/receipt metadata from both PDF and Image extractors.
+-- Tracks payment and reconciliation status against bank statements.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS invoices (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL UNIQUE,
+    organization_id UUID NOT NULL,
+    invoice_number VARCHAR(100),
+    invoice_date DATE,
+    due_date DATE,
+    customer_name VARCHAR(255),
+    gst_number VARCHAR(50),
+    total_amount NUMERIC(15, 2),
+    tax NUMERIC(15, 2),
+    total_amount_with_tax NUMERIC(15, 2),
+    payment_status VARCHAR(50) NOT NULL DEFAULT 'UNPAID',
+    paid_amount NUMERIC(15, 2) DEFAULT 0.00,
+    paid_at DATE,
+    matched_bank_statement_id UUID,
+    source_type VARCHAR(20) DEFAULT 'PDF',
+    confidence_score NUMERIC(5, 2),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_invoices_document 
+        FOREIGN KEY (document_id) 
+        REFERENCES documents(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_invoices_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- Table: invoice_line_items
+-- Stores line-item breakdowns for invoices.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS invoice_line_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    invoice_id UUID NOT NULL,
+    organization_id UUID NOT NULL,
+    item_description TEXT NOT NULL,
+    quantity NUMERIC(12, 3) DEFAULT 1.000,
+    rate_per_unit NUMERIC(15, 2),
+    total_rate NUMERIC(15, 2),
+    line_no INT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_invoice_line_items_invoice 
+        FOREIGN KEY (invoice_id) 
+        REFERENCES invoices(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_invoice_line_items_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
 -- Table: bank_statements
 -- Stores individual transaction rows parsed from uploaded bank statements.
--- Enforces row-level deduplication across overlapping files using
--- (organization_id, txn_date, description, amount, balance).
+-- Tracks payment reconciliation status against invoices.
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS bank_statements (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -56,55 +119,126 @@ CREATE TABLE IF NOT EXISTS bank_statements (
     txn_type VARCHAR(10) NOT NULL,
     amount NUMERIC(15, 2) NOT NULL,
     balance NUMERIC(15, 2) NOT NULL,
+    reconciliation_status VARCHAR(50) NOT NULL DEFAULT 'UNMATCHED',
+    matched_invoice_id UUID,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    -- Foreign Key to Document
     CONSTRAINT fk_bank_statements_document 
         FOREIGN KEY (document_id) 
         REFERENCES documents(id) 
         ON DELETE CASCADE,
 
-    -- Foreign Key to Organization
     CONSTRAINT fk_bank_statements_organization 
         FOREIGN KEY (organization_id) 
         REFERENCES organizations(id) 
         ON DELETE CASCADE,
 
-    -- Multi-tenant cross-file row deduplication constraint
+    CONSTRAINT fk_bank_statements_matched_invoice 
+        FOREIGN KEY (matched_invoice_id) 
+        REFERENCES invoices(id) 
+        ON DELETE SET NULL,
+
     CONSTRAINT uk_bank_statements_org_txn_dedup 
         UNIQUE (organization_id, txn_date, description, amount, balance)
 );
 
--- ==============================================================================
--- Indexes for High-Performance Queries
--- ==============================================================================
-
--- Fast lookup for tenant document listings sorted by newest first
-CREATE INDEX IF NOT EXISTS idx_documents_org_upload_date 
-    ON documents (organization_id, upload_date DESC);
-
--- Fast lookup for tenant documents filtered by fileType and sorted by newest first
-CREATE INDEX IF NOT EXISTS idx_documents_org_type_upload_date 
-    ON documents (organization_id, file_type, upload_date DESC);
-
--- Fast lookup for document processing status monitoring
-CREATE INDEX IF NOT EXISTS idx_documents_org_status 
-    ON documents (organization_id, processed_status);
-
--- Fast lookup for tenant transactions ordered chronologically
-CREATE INDEX IF NOT EXISTS idx_bank_statements_org_txn_date 
-    ON bank_statements (organization_id, txn_date DESC);
-
--- Fast lookup for bank statements belonging to a document
-CREATE INDEX IF NOT EXISTS idx_bank_statements_document_id 
-    ON bank_statements (document_id);
+-- Add foreign key from invoices to bank_statements
+ALTER TABLE invoices 
+    ADD CONSTRAINT fk_invoices_matched_bank_statement 
+    FOREIGN KEY (matched_bank_statement_id) 
+    REFERENCES bank_statements(id) 
+    ON DELETE SET NULL;
 
 -- ==============================================================================
--- Demo Seed Data (Optional / For Local Testing)
+-- Table: whatsapp_messages
+-- Stores individual message records parsed from WhatsApp exports.
 -- ==============================================================================
-INSERT INTO organizations (id, business_name, created_at)
-VALUES 
-    ('a0000000-0000-0000-0000-000000000001', 'Acme Retail Enterprises', CURRENT_TIMESTAMP),
-    ('b0000000-0000-0000-0000-000000000002', 'Nova Logistics & Transport', CURRENT_TIMESTAMP)
-ON CONFLICT (id) DO NOTHING;
+CREATE TABLE IF NOT EXISTS whatsapp_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL,
+    organization_id UUID NOT NULL,
+    customer_name VARCHAR(255),
+    sender VARCHAR(255) NOT NULL,
+    message_date VARCHAR(50),
+    message_time VARCHAR(50),
+    message_text TEXT NOT NULL,
+    message_timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+    CONSTRAINT fk_whatsapp_messages_document 
+        FOREIGN KEY (document_id) 
+        REFERENCES documents(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_whatsapp_messages_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- Table: inventory_items
+-- Stores individual product/SKU mentions extracted from WhatsApp chats & inventory uploads.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS inventory_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL,
+    organization_id UUID NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    quantity NUMERIC(12, 3),
+    quantity_unit VARCHAR(50),
+    mention_date VARCHAR(50),
+    mention_time VARCHAR(50),
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_inventory_items_document 
+        FOREIGN KEY (document_id) 
+        REFERENCES documents(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_inventory_items_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- Table: whatsapp_insights
+-- Stores high-level AI analysis and demand intelligence extracted from conversation streams.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS whatsapp_insights (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL UNIQUE,
+    organization_id UUID NOT NULL,
+    demand_intelligence JSONB DEFAULT '{}'::jsonb,
+    customer_enquiries JSONB DEFAULT '[]'::jsonb,
+    customer_sentiment JSONB DEFAULT '[]'::jsonb,
+    unmet_demands JSONB DEFAULT '[]'::jsonb,
+    potential_leads JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_whatsapp_insights_document 
+        FOREIGN KEY (document_id) 
+        REFERENCES documents(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_whatsapp_insights_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- Performance Indices
+-- ==============================================================================
+CREATE INDEX IF NOT EXISTS idx_documents_tenant_type ON documents(organization_id, file_type);
+CREATE INDEX IF NOT EXISTS idx_documents_status_type ON documents(processed_status, file_type, upload_date);
+CREATE INDEX IF NOT EXISTS idx_invoices_org_invnum ON invoices(organization_id, invoice_number);
+CREATE INDEX IF NOT EXISTS idx_invoices_payment_status ON invoices(organization_id, payment_status);
+CREATE INDEX IF NOT EXISTS idx_bank_statements_org_status ON bank_statements(organization_id, reconciliation_status);
+CREATE INDEX IF NOT EXISTS idx_bank_statements_txn_date ON bank_statements(organization_id, txn_date);
+CREATE INDEX IF NOT EXISTS idx_inventory_items_org_item ON inventory_items(organization_id, item_name);
+CREATE INDEX IF NOT EXISTS idx_inventory_items_doc ON inventory_items(document_id);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_messages_doc ON whatsapp_messages(document_id);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_insights_org ON whatsapp_insights(organization_id);

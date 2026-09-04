@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_001.png",
+  "category": "clean_handwritten_units_in_qty",
+  "vendor_name": "Shree Ganesh General Stores",
+  "receipt_number": "1257",
+  "invoice_number": null,
+  "date": "2024-05-12",
+  "subtotal": 740.00,
+  "discount": 10.00,
+  "tax": null,
+  "total": 730.00,
+  "items": [
+    {"description": "Rice (Sona Masoori)", "quantity": 5, "unit_price": 60.00, "amount": 300.00},
+    {"description": "Toor Dal", "quantity": 1, "unit_price": 120.00, "amount": 120.00},
+    {"description": "Sunflower Oil", "quantity": 1, "unit_price": 140.00, "amount": 140.00},
+    {"description": "Sugar", "quantity": 2, "unit_price": 45.00, "amount": 90.00},
+    {"description": "Tea Powder", "quantity": 250, "unit_price": 90.00, "amount": 90.00}
+  ]
+}

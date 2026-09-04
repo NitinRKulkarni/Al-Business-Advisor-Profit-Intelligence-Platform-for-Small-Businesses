@@ -26,9 +26,16 @@ spring:
 server:
   port: 8080
 
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173}
+  auth:
+    username: ${APP_AUTH_USERNAME:teamsanskriti}
+    password: ${APP_AUTH_PASSWORD:Sanskriti@2026!Secure}
+    session-secret: ${APP_AUTH_SESSION_SECRET:sanskriti_default_secret_key_2026}
+
 ai:
   service:
     python:
       base-url: ${AI_PYTHON_SERVICE_URL:http://localhost:8000}
-      invoice-endpoint: /extract/invoice
-
+      extract-endpoint: /api/v1/extract

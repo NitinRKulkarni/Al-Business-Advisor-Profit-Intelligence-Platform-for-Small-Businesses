@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_127.png",
+  "category": "heldout_printed_small_amounts_amount_in_words",
+  "_note": "HELD-OUT evaluation receipt: transcribed AFTER the implementation was finished, never used to tune any threshold, regex, weight or gate. Image-to-file mapping was verified by opening THIS image on its own. Small-denomination amounts written without decimals, Total as '285/-', plus an 'amount in words' line. Two fields are deliberately OMITTED (not null) because they cannot be read confidently from this low-resolution image, so they are excluded from scoring rather than guessed: (1) receipt_number -- the digits after 'Bill No.' are partly obscured by a strikethrough-like mark and could be 887 or 587; (2) the Pen Set row's quantity -- that qty cell is ambiguous, although rate 45 with amount 45 implies 1. Every other row is self-consistent and the amounts sum to the printed total: 50+45+120+70 = 285.",
+  "vendor_name": "Sri Vignesh Fancy Store",
+  "customer_name": "Priya S",
+  "invoice_number": null,
+  "date": "2022-04-25",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 285.00,
+  "items": [
+    {"description": "Hair Clip", "quantity": 2, "unit_price": 25.00, "amount": 50.00},
+    {"description": "Pen Set", "unit_price": 45.00, "amount": 45.00},
+    {"description": "Water Bottle", "quantity": 1, "unit_price": 120.00, "amount": 120.00},
+    {"description": "Key Chain", "quantity": 2, "unit_price": 35.00, "amount": 70.00}
+  ]
+}

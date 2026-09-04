@@ -1,0 +1,448 @@
+[
+  {
+    "customer_name": "Anita Verma",
+    "messages": [
+      {
+        "date": "18/06/24",
+        "time": "15:32 ",
+        "sender": "Anita Verma",
+        "message": "Diwali ke liye dry fruits ka koi combo pack hai?",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:40 ",
+        "sender": "Kirana Owner",
+        "message": "Haan hai, 500gm mix box 450 rs mein",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:41 ",
+        "sender": "Anita Verma",
+        "message": "Kitne types hote hai isme",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:45 ",
+        "sender": "Kirana Owner",
+        "message": "Kaju, badam, kishmish, pista - char cheez",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:46 ",
+        "sender": "Anita Verma",
+        "message": "Achha, 10 box chahiye gift ke liye, bulk discount milega?",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:50 ",
+        "sender": "Kirana Owner",
+        "message": "10 box pe 400 rs each kar dunga",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:51 ",
+        "sender": "Anita Verma",
+        "message": "Ok confirm, Diwali se 2 din pehle chahiye",
+        "customer_name": "Anita Verma"
+      },
+      {
+        "date": "18/06/24",
+        "time": "15:52 ",
+        "sender": "Kirana Owner",
+        "message": "Noted, time pe ready rahega",
+        "customer_name": "Anita Verma"
+      }
+    ]
+  },
+  {
+    "customer_name": "Deepak Shah",
+    "messages": [
+      {
+        "date": "19/06/24",
+        "time": "10:02 ",
+        "sender": "Deepak Shah",
+        "message": "Hi, do you stock Amul butter 500g?",
+        "customer_name": "Deepak Shah"
+      },
+      {
+        "date": "19/06/24",
+        "time": "10:05 ",
+        "sender": "Kirana Owner",
+        "message": "Yes, 280 rs, fresh stock came today",
+        "customer_name": "Deepak Shah"
+      },
+      {
+        "date": "19/06/24",
+        "time": "10:06 ",
+        "sender": "Deepak Shah",
+        "message": "Great, please keep 3 packs aside, I'll pick up evening",
+        "customer_name": "Deepak Shah"
+      },
+      {
+        "date": "19/06/24",
+        "time": "10:07 ",
+        "sender": "Kirana Owner",
+        "message": "Sure, will keep ready by 5pm",
+        "customer_name": "Deepak Shah"
+      },
+      {
+        "date": "19/06/24",
+        "time": "18:30 ",
+        "sender": "Deepak Shah",
+        "message": "Picked up, thanks! Quality was good as always",
+        "customer_name": "Deepak Shah"
+      },
+      {
+        "date": "19/06/24",
+        "time": "18:31 ",
+        "sender": "Kirana Owner",
+        "message": "Thank you sir, see you next time",
+        "customer_name": "Deepak Shah"
+      }
+    ]
+  },
+  {
+    "customer_name": "Fatima Sheikh",
+    "messages": [
+      {
+        "date": "20/06/24",
+        "time": "09:16:05",
+        "sender": "Fatima Sheikh",
+        "message": "Assalam alaikum, ration card wale rate pe chawal milega kya, 10kg chahiye",
+        "customer_name": "Fatima Sheikh"
+      },
+      {
+        "date": "20/06/24",
+        "time": "09:20:10",
+        "sender": "Kirana Owner",
+        "message": "Wa alaikum salam, ration rate to sirf card holders ko milta hai govt shop se, humare paas market rate hai 45rs/kg",
+        "customer_name": "Fatima Sheikh"
+      },
+      {
+        "date": "20/06/24",
+        "time": "09:22:00",
+        "sender": "Fatima Sheikh",
+        "message": "Achha thik hai, market rate pe hi 10kg de do",
+        "customer_name": "Fatima Sheikh"
+      },
+      {
+        "date": "20/06/24",
+        "time": "09:25:00",
+        "sender": "Kirana Owner",
+        "message": "Ok 450rs total, kal delivery ho jayegi",
+        "customer_name": "Fatima Sheikh"
+      }
+    ]
+  },
+  {
+    "customer_name": "Geeta Devi",
+    "messages": [
+      {
+        "date": "22/06/24",
+        "time": "07:46 ",
+        "sender": "Geeta Devi",
+        "message": "bhaiya subha subha namaste",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:47 ",
+        "sender": "Kirana Owner",
+        "message": "Namaste didi",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:48 ",
+        "sender": "Geeta Devi",
+        "message": "dal chahiye arhar wali 2kg or besan 1kg or namak 1packet",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:50 ",
+        "sender": "Kirana Owner",
+        "message": "Arhar dal 140/kg, besan 60/kg, namak 20/packet total 380",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:52 ",
+        "sender": "Geeta Devi",
+        "message": "thoda kam karo na roj ka customer hu",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:55 ",
+        "sender": "Kirana Owner",
+        "message": "Ok 360 kar diya",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:56 ",
+        "sender": "Geeta Devi",
+        "message": "theek h bhej do shaam tak",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "07:57 ",
+        "sender": "Kirana Owner",
+        "message": "Ji shaam 6 baje tak pahuch jayega",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "19:30 ",
+        "sender": "Geeta Devi",
+        "message": "bhaiya abhi tak nahi aaya samaan",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "19:35 ",
+        "sender": "Kirana Owner",
+        "message": "Sorry didi delivery boy bimar hai aaj, kal subah sabse pehle bhejenge",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "19:36 ",
+        "sender": "Geeta Devi",
+        "message": "kal bhi yahi bola tha pichli baar",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "19:40 ",
+        "sender": "Kirana Owner",
+        "message": "Sorry didi is baar pakka subah 8 baje tak",
+        "customer_name": "Geeta Devi"
+      },
+      {
+        "date": "22/06/24",
+        "time": "19:41 ",
+        "sender": "Geeta Devi",
+        "message": "theek h dekhte h",
+        "customer_name": "Geeta Devi"
+      }
+    ]
+  },
+  {
+    "customer_name": "Manoj Kumar",
+    "messages": [
+      {
+        "date": "17/06/24",
+        "time": "08:02 ",
+        "sender": "Manoj Kumar",
+        "message": "Kal jo cheeni li thi wo kam nikli, 1kg kam tha",
+        "customer_name": "Manoj Kumar"
+      },
+      {
+        "date": "17/06/24",
+        "time": "08:10 ",
+        "sender": "Kirana Owner",
+        "message": "Sir sorry, weight machine check karvata hu, bahut galti hui",
+        "customer_name": "Manoj Kumar"
+      },
+      {
+        "date": "17/06/24",
+        "time": "08:12 ",
+        "sender": "Manoj Kumar",
+        "message": "Ye teesri baar hua hai, ab bharosa nahi hai",
+        "customer_name": "Manoj Kumar"
+      },
+      {
+        "date": "17/06/24",
+        "time": "08:15 ",
+        "sender": "Kirana Owner",
+        "message": "Sir aapko extra 1kg free dunga next order pe, aur machine abhi check karata hu",
+        "customer_name": "Manoj Kumar"
+      },
+      {
+        "date": "17/06/24",
+        "time": "08:16 ",
+        "sender": "Manoj Kumar",
+        "message": "Theek hai lekin agli baar aisa hua to main dusri dukan try karunga",
+        "customer_name": "Manoj Kumar"
+      },
+      {
+        "date": "17/06/24",
+        "time": "08:17 ",
+        "sender": "Kirana Owner",
+        "message": "Samajh gaya sir, aage se dhyan rakhunga",
+        "customer_name": "Manoj Kumar"
+      }
+    ]
+  },
+  {
+    "customer_name": "Rajesh Traders",
+    "messages": [
+      {
+        "date": "16/06/24",
+        "time": "11:05 ",
+        "sender": "Rajesh Traders",
+        "message": "Namaste, hume 50 packet Maggi chahiye monthly supply ke liye",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:10 ",
+        "sender": "Kirana Owner",
+        "message": "Haan bhai, 50 packet ka rate 12 rs/packet milega",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:12 ",
+        "sender": "Rajesh Traders",
+        "message": "50 se jyada lenge agar rate 11 ho jaye",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:15 ",
+        "sender": "Kirana Owner",
+        "message": "Chaliye 100+ pe 11 rs kar dete hai",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:16 ",
+        "sender": "Rajesh Traders",
+        "message": "Ok deal, monthly order fix karte hai, har mahine 1st ko chahiye",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:18 ",
+        "sender": "Kirana Owner",
+        "message": "Perfect, note kar liya",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:21 ",
+        "sender": "Rajesh Traders",
+        "message": "Ye photo dekh lo, hume ye brand chahiye specifically",
+        "customer_name": "Rajesh Traders"
+      },
+      {
+        "date": "16/06/24",
+        "time": "11:25 ",
+        "sender": "Kirana Owner",
+        "message": "Ok same brand available hai, no problem",
+        "customer_name": "Rajesh Traders"
+      }
+    ]
+  },
+  {
+    "customer_name": "Sunita Patil",
+    "messages": [
+      {
+        "date": "15/06/24",
+        "time": "09:14 ",
+        "sender": "Sunita Patil",
+        "message": "Bhaiya, 5 kg atta hai kya, aata chahiye",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:20 ",
+        "sender": "Kirana Owner",
+        "message": "Haan hai, 220 rs 5kg bag",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:21 ",
+        "sender": "Sunita Patil",
+        "message": "Thoda mehenga hai na, pehle 200 tha",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:25 ",
+        "sender": "Kirana Owner",
+        "message": "Madam wheat price badh gaya hai, but aap regular customer ho, 210 kar dunga",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:26 ",
+        "sender": "Sunita Patil",
+        "message": "Theek hai, 2 bag bhej dena, and ek sarson tel 1 litre bhi",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:27 ",
+        "sender": "Kirana Owner",
+        "message": "Ok, delivery 1 ghante mein ho jayegi",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "09:28 ",
+        "sender": "Sunita Patil",
+        "message": "Thank you",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "18:40 ",
+        "sender": "Sunita Patil",
+        "message": "Bhaiya tel nahi mila delivery mein, atta hi aaya",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "18:45 ",
+        "sender": "Kirana Owner",
+        "message": "Sorry madam, galti se chhoot gaya, kal subah bhej dunga free mein",
+        "customer_name": "Sunita Patil"
+      },
+      {
+        "date": "15/06/24",
+        "time": "18:46 ",
+        "sender": "Sunita Patil",
+        "message": "Ok thank you, but please next time check kar lena",
+        "customer_name": "Sunita Patil"
+      }
+    ]
+  },
+  {
+    "customer_name": "Vikram Singh",
+    "messages": [
+      {
+        "date": "21/06/24",
+        "time": "12:02 ",
+        "sender": "Vikram Singh",
+        "message": "Aap log cold drink bhi rakhte ho?",
+        "customer_name": "Vikram Singh"
+      },
+      {
+        "date": "21/06/24",
+        "time": "12:05 ",
+        "sender": "Kirana Owner",
+        "message": "Nahi bhai, hum sirf grocery rakhte hai, cold drink nahi",
+        "customer_name": "Vikram Singh"
+      },
+      {
+        "date": "21/06/24",
+        "time": "12:06 ",
+        "sender": "Vikram Singh",
+        "message": "Ok no problem",
+        "customer_name": "Vikram Singh"
+      }
+    ]
+  }
+]

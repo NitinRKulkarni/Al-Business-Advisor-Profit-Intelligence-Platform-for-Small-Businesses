@@ -1,0 +1,19 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_105.png",
+  "category": "low_contrast_faded_paper_no_gst",
+  "_note": "Low-contrast receipt on tan/beige paper (faded appearance). No subtotal/tax/discount lines exist on this receipt at all -- just a single 'Total' line, which is genuinely the final payable amount here (no adjustment follows it), unlike the Total-before-discount cases elsewhere in this dataset.",
+  "vendor_name": "Glow & Gorgeous",
+  "customer_name": null,
+  "receipt_number": "96",
+  "invoice_number": null,
+  "date": "2022-09-27",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 850.00,
+  "items": [
+    {"description": "Hair Cut", "quantity": null, "unit_price": null, "amount": 250.00},
+    {"description": "Threading", "quantity": null, "unit_price": null, "amount": 100.00},
+    {"description": "Facial", "quantity": null, "unit_price": null, "amount": 500.00}
+  ]
+}

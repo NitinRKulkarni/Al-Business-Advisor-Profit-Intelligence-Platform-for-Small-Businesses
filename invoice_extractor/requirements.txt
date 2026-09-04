@@ -1,0 +1,20 @@
+# PDF text/table extraction (embedded-text PDFs only; use OCR upstream for scans)
+pdfplumber==0.11.4
+
+# Schema, validation, and JSON/DB serialization
+pydantic==2.9.2
+
+# AWS SDK — used by the DynamoDB repository and the S3-triggered Lambda handler.
+# Note: the Lambda runtime already bundles boto3, so this is mainly for local runs.
+boto3==1.35.36
+
+# --- Web API layer (connects the parser to a frontend over HTTP) ---
+# FastAPI serves the REST endpoints; uvicorn is the ASGI server that runs it;
+# python-multipart is required by FastAPI to accept file uploads (multipart/form-data).
+fastapi==0.115.4
+uvicorn==0.32.0
+python-multipart==0.0.12
+
+# --- Database layer (extraction service reads documents, writes invoices) ---
+# psycopg 3 (binary build bundles libpq, no system install needed).
+psycopg[binary]==3.2.3

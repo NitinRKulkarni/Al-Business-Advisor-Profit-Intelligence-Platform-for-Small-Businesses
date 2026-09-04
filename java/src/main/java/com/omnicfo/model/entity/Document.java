@@ -2,6 +2,7 @@ package com.omnicfo.model.entity;
 
 import com.omnicfo.model.enums.FileType;
 import com.omnicfo.model.enums.ProcessedStatus;
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -62,6 +63,13 @@ public class Document {
 
     @Column(name = "file_hash", nullable = false, length = 64)
     private String fileHash;
+
+    /**
+     * Stored binary payload (BLOB) as PostgreSQL BYTEA.
+     */
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "file_data", columnDefinition = "BYTEA")
+    private byte[] fileData;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)

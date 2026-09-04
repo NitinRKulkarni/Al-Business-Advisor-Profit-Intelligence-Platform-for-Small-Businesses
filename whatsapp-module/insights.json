@@ -1,0 +1,282 @@
+{
+  "items": [
+    {
+      "item_name": "dry fruits combo pack",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:32",
+      "description": "Inquired for Diwali"
+    },
+    {
+      "item_name": "mix box",
+      "quantity": 500,
+      "quantity_unit": "gm",
+      "date": "18/06/24",
+      "timestamp": "15:40",
+      "description": "Priced at 450 rs"
+    },
+    {
+      "item_name": "Kaju",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Part of the dry fruit mix box"
+    },
+    {
+      "item_name": "badam",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Part of the dry fruit mix box"
+    },
+    {
+      "item_name": "kishmish",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Part of the dry fruit mix box"
+    },
+    {
+      "item_name": "pista",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "18/06/24",
+      "timestamp": "15:45",
+      "description": "Part of the dry fruit mix box"
+    },
+    {
+      "item_name": "box",
+      "quantity": 10,
+      "quantity_unit": "box",
+      "date": "18/06/24",
+      "timestamp": "15:46",
+      "description": "Requested for gifting with bulk discount"
+    },
+    {
+      "item_name": "box",
+      "quantity": 10,
+      "quantity_unit": "box",
+      "date": "18/06/24",
+      "timestamp": "15:50",
+      "description": "Discounted rate offered at 400 rs each"
+    },
+    {
+      "item_name": "Amul butter 500g",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "19/06/24",
+      "timestamp": "10:02",
+      "description": "Inquiring about stock availability"
+    },
+    {
+      "item_name": "Amul butter 500g",
+      "quantity": 3,
+      "quantity_unit": "packs",
+      "date": "19/06/24",
+      "timestamp": "10:06",
+      "description": "Keeping aside for evening pickup"
+    },
+    {
+      "item_name": "chawal",
+      "quantity": 10,
+      "quantity_unit": "kg",
+      "date": "20/06/24",
+      "timestamp": "09:16:05",
+      "description": "asking if available at ration card rate"
+    },
+    {
+      "item_name": "chawal",
+      "quantity": 10,
+      "quantity_unit": "kg",
+      "date": "20/06/24",
+      "timestamp": "09:22:00",
+      "description": "ordered at market rate of 45rs/kg"
+    },
+    {
+      "item_name": "dal arhar wali",
+      "quantity": 2,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
+    },
+    {
+      "item_name": "besan",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
+    },
+    {
+      "item_name": "namak",
+      "quantity": 1,
+      "quantity_unit": "packet",
+      "date": "22/06/24",
+      "timestamp": "07:48",
+      "description": "Requested by customer"
+    },
+    {
+      "item_name": "Arhar dal",
+      "quantity": null,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Priced at 140 per kg"
+    },
+    {
+      "item_name": "besan",
+      "quantity": null,
+      "quantity_unit": "kg",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Priced at 60 per kg"
+    },
+    {
+      "item_name": "namak",
+      "quantity": null,
+      "quantity_unit": "packet",
+      "date": "22/06/24",
+      "timestamp": "07:50",
+      "description": "Priced at 20 per packet"
+    },
+    {
+      "item_name": "cheeni",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "17/06/24",
+      "timestamp": "08:02",
+      "description": "1kg short in yesterday's purchase"
+    },
+    {
+      "item_name": "cheeni",
+      "quantity": 1,
+      "quantity_unit": "kg",
+      "date": "17/06/24",
+      "timestamp": "08:15",
+      "description": "offered free on next order as compensation"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:05",
+      "description": "monthly supply request"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:10",
+      "description": "quoted rate at 12 rs per packet"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 50,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:12",
+      "description": "requesting rate of 11 rs if order is over 50"
+    },
+    {
+      "item_name": "Maggi",
+      "quantity": 100,
+      "quantity_unit": "packet",
+      "date": "16/06/24",
+      "timestamp": "11:15",
+      "description": "offered 11 rs rate for 100+ packets"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "date": "15/06/24",
+      "timestamp": "09:14",
+      "description": "Customer asking for availability"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 5,
+      "quantity_unit": "kg",
+      "date": "15/06/24",
+      "timestamp": "09:20",
+      "description": "Owner quoted 220 rs for 5kg bag"
+    },
+    {
+      "item_name": "wheat",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "09:25",
+      "description": "Owner mentioned price increase and offered discounted price of 210"
+    },
+    {
+      "item_name": "atta",
+      "quantity": 2,
+      "quantity_unit": "bag",
+      "date": "15/06/24",
+      "timestamp": "09:26",
+      "description": "Customer requested to send 2 bags"
+    },
+    {
+      "item_name": "sarson tel",
+      "quantity": 1,
+      "quantity_unit": "litre",
+      "date": "15/06/24",
+      "timestamp": "09:26",
+      "description": "Customer ordered 1 litre mustard oil"
+    },
+    {
+      "item_name": "tel",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "18:40",
+      "description": "Customer reported oil was missing in delivery"
+    },
+    {
+      "item_name": "atta",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "15/06/24",
+      "timestamp": "18:40",
+      "description": "Customer confirmed receiving only atta"
+    },
+    {
+      "item_name": "cold drink",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:02",
+      "description": "Customer asked if available"
+    },
+    {
+      "item_name": "grocery",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:05",
+      "description": "Owner mentioned they only keep grocery"
+    },
+    {
+      "item_name": "cold drink",
+      "quantity": null,
+      "quantity_unit": "",
+      "date": "21/06/24",
+      "timestamp": "12:05",
+      "description": "Owner stated they do not keep cold drinks"
+    }
+  ],
+  "_meta": {
+    "source_file": "sample_input_parsed.json",
+    "total_messages_analyzed": 58,
+    "generated_at": "2026-09-03T13:01:55.670548Z",
+    "model": "gemini-3.6-flash"
+  }
+}

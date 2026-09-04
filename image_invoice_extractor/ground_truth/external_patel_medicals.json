@@ -1,0 +1,21 @@
+{
+  "image": "test/2.png",
+  "category": "clean_printed_ruled_notebook_external",
+  "_note": "External receipt, not part of the 156-image dataset and not previously in the formal ground-truth benchmark (only tested ad-hoc via the CLI earlier). Clean, legible handwriting on ruled notebook paper -- used as a 'should be easy' control case among the harder external/dataset receipts.",
+  "vendor_name": "Patel Medicals",
+  "customer_name": "Ravi Verma",
+  "receipt_number": "0456",
+  "invoice_number": null,
+  "date": "2024-05-25",
+  "subtotal": 700.00,
+  "discount": 15.00,
+  "tax": null,
+  "total": 685.00,
+  "items": [
+    {"description": "Paracetamol 650", "quantity": 10, "unit_price": 15.00, "amount": 150.00},
+    {"description": "Crocin Advance", "quantity": 10, "unit_price": 20.00, "amount": 200.00},
+    {"description": "Cetrizine", "quantity": 10, "unit_price": 18.00, "amount": 180.00},
+    {"description": "Disprin (Strip)", "quantity": 5, "unit_price": 22.00, "amount": 110.00},
+    {"description": "Electral Powder", "quantity": 2, "unit_price": 30.00, "amount": 60.00}
+  ]
+}

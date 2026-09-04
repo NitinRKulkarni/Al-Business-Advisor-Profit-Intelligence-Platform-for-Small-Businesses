@@ -1,0 +1,20 @@
+{
+  "image": "data/samples/batch2/individual/batch2_invoice_090.png",
+  "category": "delivery_challan_different_document_type",
+  "_note": "Different document type from every other receipt in this ground-truth set: a 'Delivery Challan' (goods-delivery note), not a cash memo/bill -- tests document_type detection and vendor-name extraction on a header format ('DELIVERY CHALLAN' / 'SRI MURUGAN AGENCIES') this project's header-keyword list may or may not recognize. Has a 'To: Mr. Anbu Traders' addressee line (recipient, not the paying customer in the usual sense) and no discount/tax lines. Bottom has a 'Receiver Sign:' line instead of 'Thank you' -- another layout signal distinct from the rest of the dataset.",
+  "vendor_name": "Sri Murugan Agencies",
+  "customer_name": "Anbu Traders",
+  "receipt_number": "861",
+  "invoice_number": null,
+  "date": "2022-04-23",
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 4800.00,
+  "items": [
+    {"description": "Sunlight Soap", "quantity": 20, "unit_price": 220.00, "amount": 1200.00},
+    {"description": "Rin Detergent", "quantity": 10, "unit_price": 140.00, "amount": 1400.00},
+    {"description": "Clinic Plus", "quantity": 10, "unit_price": 180.00, "amount": 1800.00},
+    {"description": "Harpic", "quantity": 5, "unit_price": 80.00, "amount": 400.00}
+  ]
+}

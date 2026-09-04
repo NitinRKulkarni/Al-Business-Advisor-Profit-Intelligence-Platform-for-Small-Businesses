@@ -42,14 +42,40 @@ public class DocumentController {
     public ResponseEntity<DocumentUploadResponse> uploadDocument(
         @RequestHeader("X-Tenant-ID") UUID organizationId,
         @RequestParam("file") MultipartFile file,
-        @RequestParam("fileType") String fileType
+        @RequestParam(value = "sourceType", required = false) String sourceType,
+        @RequestParam(value = "fileType", required = false) String fileType
     ) {
-        log.info("Received file upload request from tenant={} for fileName='{}', fileType='{}'",
-            organizationId, file != null ? file.getOriginalFilename() : "null", fileType);
+        String effectiveType = (sourceType != null && !sourceType.isBlank()) ? sourceType : fileType;
+        log.info("Received file upload request from tenant={} for fileName='{}', sourceType='{}'",
+            organizationId, file != null ? file.getOriginalFilename() : "null", effectiveType);
 
-        DocumentUploadResponse response = documentService.uploadDocument(organizationId, file, fileType);
+        DocumentUploadResponse response = documentService.uploadDocument(organizationId, file, effectiveType);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Batch uploads and ingests multiple documents for the tenant specified in the X-Tenant-ID header.
+     *
+     * @param organizationId tenant organization UUID provided via header
+     * @param files list of binary payloads of the documents
+     * @param sourceType optional unified sourceType routing parameter
+     * @param fileTypes optional list of classifications or fallback
+     * @return 201 CREATED with list of DocumentUploadResponse DTOs
+     */
+    @PostMapping(value = "/batch-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<DocumentUploadResponse>> uploadBatchDocuments(
+        @RequestHeader("X-Tenant-ID") UUID organizationId,
+        @RequestParam("files") List<MultipartFile> files,
+        @RequestParam(value = "sourceType", required = false) String sourceType,
+        @RequestParam(value = "fileTypes", required = false) List<String> fileTypes
+    ) {
+        log.info("Received batch upload request from tenant={} for {} file(s), sourceType={}",
+            organizationId, files != null ? files.size() : 0, sourceType);
+
+        List<DocumentUploadResponse> responses = documentService.uploadBatchDocuments(organizationId, files, fileTypes, sourceType);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
     /**
@@ -69,5 +95,51 @@ public class DocumentController {
         List<DocumentResponseDTO> documents = documentService.getDocuments(organizationId, fileType);
 
         return ResponseEntity.ok(documents);
+    }
+
+    /**
+     * Retrieves the raw file payload of an uploaded document for viewing or downloading.
+     *
+     * @param organizationId tenant organization UUID provided via header
+     * @param documentId UUID of the document
+     * @return 200 OK with binary file data and proper MIME headers
+     */
+    @GetMapping("/{documentId}/view")
+    public ResponseEntity<byte[]> viewDocument(
+        @RequestHeader("X-Tenant-ID") UUID organizationId,
+        @org.springframework.web.bind.annotation.PathVariable("documentId") UUID documentId
+    ) {
+        log.info("Received request to view/stream file docId={} for tenant={}", documentId, organizationId);
+
+        com.omnicfo.model.entity.Document document = documentService.getDocumentById(organizationId, documentId);
+
+        byte[] fileBytes = document.getFileData();
+        if (fileBytes == null || fileBytes.length == 0) {
+            return ResponseEntity.noContent().build();
+        }
+
+        String fileName = document.getFileName() != null ? document.getFileName() : "document";
+        String lowerName = fileName.toLowerCase();
+        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
+
+        if (lowerName.endsWith(".pdf")) {
+            mediaType = MediaType.APPLICATION_PDF;
+        } else if (lowerName.endsWith(".png")) {
+            mediaType = MediaType.IMAGE_PNG;
+        } else if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg")) {
+            mediaType = MediaType.IMAGE_JPEG;
+        } else if (lowerName.endsWith(".csv")) {
+            mediaType = MediaType.parseMediaType("text/csv; charset=UTF-8");
+        } else if (lowerName.endsWith(".txt")) {
+            mediaType = MediaType.TEXT_PLAIN;
+        } else if (lowerName.endsWith(".zip")) {
+            mediaType = MediaType.parseMediaType("application/zip");
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .header(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+                .body(fileBytes);
     }
 }

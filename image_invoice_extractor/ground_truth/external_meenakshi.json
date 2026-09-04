@@ -1,0 +1,17 @@
+{
+  "image": "test/1.png",
+  "category": "messy_handwritten_shadowed_external",
+  "_note": "External receipt, not part of the 156-image dataset. 'date' is deliberately OMITTED (not null) because the handwritten date digit is not confidently readable from this image, so it is excluded from scoring rather than guessed. Row 3's printed rate (1550) and amount (1350) are internally inconsistent on the receipt itself; the printed values are recorded as-is because the benchmark measures whether OCR read what is printed.",
+  "vendor_name": "MEENAKSHI TRADERS",
+  "receipt_number": "1198",
+  "invoice_number": null,
+  "subtotal": null,
+  "discount": null,
+  "tax": null,
+  "total": 5800.00,
+  "items": [
+    {"description": "Groundnut Oil (15kg)", "quantity": 2, "unit_price": 1450.00, "amount": 2900.00},
+    {"description": "Sunflower Oil (15kg)", "quantity": 1, "unit_price": 1550.00, "amount": 1550.00},
+    {"description": "Palmolain Oil (15kg)", "quantity": 1, "unit_price": 1550.00, "amount": 1350.00}
+  ]
+}

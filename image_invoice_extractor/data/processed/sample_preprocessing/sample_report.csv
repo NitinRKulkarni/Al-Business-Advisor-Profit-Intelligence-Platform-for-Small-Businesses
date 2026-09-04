@@ -1,0 +1,9 @@
+label,filename,quality_warnings,document_boundary_status,operations_applied,preprocessing_notes,original_size,final_size,processing_time_s
+good_1,batch2_invoice_002.png,,detected,perspective_corrected;grayscale_conversion,,375x498,373x475,0.0052
+good_2,batch2_invoice_007.png,,detected,perspective_corrected;grayscale_conversion,,376x523,374x297,0.0044
+low_light_1,batch2_invoice_088.png,uneven_lighting_or_shadow,fills_frame,grayscale_conversion;shadow_correction,uneven_lighting_or_shadow,292x286,292x286,0.0042
+low_light_2,batch2_invoice_089.png,uneven_lighting_or_shadow,fills_frame,grayscale_conversion;shadow_correction,uneven_lighting_or_shadow,310x286,310x286,0.0048
+low_contrast,batch2_invoice_105.png,low_contrast,fills_frame,grayscale_conversion;contrast_enhancement,low_contrast,311x267,311x267,0.0025
+noisy,batch2_invoice_060.png,high_noise,detected,perspective_corrected;grayscale_conversion;denoise,high_noise,300x336,257x154,0.0033
+skewed,batch2_invoice_015.png,possible_skew,detected,deskewed;grayscale_conversion,possible_skew,375x337,395x360,0.007
+low_resolution,batch2_invoice_006.png,skew_not_estimable;low_resolution,detected,resize;grayscale_conversion,skew_not_estimable;low_resolution,374x523,429x600,0.0072

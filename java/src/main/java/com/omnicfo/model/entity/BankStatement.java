@@ -23,9 +23,8 @@ import java.util.Objects;
 import java.util.UUID;
 
 /**
- * Represents a single transaction row from an ingested bank statement CSV.
- * Unique constraint on (organization_id, txn_date, description, amount, balance)
- * guarantees row-level deduplication across multiple overlapping statement files.
+ * Represents a single transaction row from an ingested bank statement.
+ * Supports row-level deduplication and automated reconciliation against invoices.
  */
 @Entity
 @Table(
@@ -71,6 +70,13 @@ public class BankStatement {
     private BigDecimal balance;
 
     @Builder.Default
+    @Column(name = "reconciliation_status", nullable = false, length = 50)
+    private String reconciliationStatus = "UNMATCHED";
+
+    @Column(name = "matched_invoice_id")
+    private UUID matchedInvoiceId;
+
+    @Builder.Default
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -79,6 +85,9 @@ public class BankStatement {
     public void prePersist() {
         if (this.id == null) {
             this.id = UUID.randomUUID();
+        }
+        if (this.reconciliationStatus == null) {
+            this.reconciliationStatus = "UNMATCHED";
         }
         if (this.createdAt == null) {
             this.createdAt = Instant.now();

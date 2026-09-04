@@ -24,6 +24,21 @@ public interface DocumentService {
     DocumentUploadResponse uploadDocument(UUID organizationId, MultipartFile file, String fileType);
 
     /**
+     * Uploads and ingests multiple documents in a batch for a specific tenant organization.
+     *
+     * @param organizationId UUID of the tenant organization
+     * @param files list of binary files
+     * @param fileTypes list of corresponding file types or single fallback type
+     * @return list of DocumentUploadResponse DTOs
+     */
+    List<DocumentUploadResponse> uploadBatchDocuments(UUID organizationId, List<MultipartFile> files, List<String> fileTypes);
+
+    /**
+     * Uploads and ingests multiple documents in a batch for a specific tenant organization with a global sourceType fallback.
+     */
+    List<DocumentUploadResponse> uploadBatchDocuments(UUID organizationId, List<MultipartFile> files, List<String> fileTypes, String sourceType);
+
+    /**
      * Retrieves all uploaded documents for a tenant, optionally filtered by fileType.
      *
      * @param organizationId UUID of the tenant organization
@@ -31,4 +46,13 @@ public interface DocumentService {
      * @return list of DocumentResponseDTO sorted by upload date descending
      */
     List<DocumentResponseDTO> getDocuments(UUID organizationId, String fileType);
+
+    /**
+     * Retrieves a specific document entity including fileData byte payload for a tenant.
+     *
+     * @param organizationId UUID of the tenant organization
+     * @param documentId UUID of the document
+     * @return Document entity
+     */
+    com.omnicfo.model.entity.Document getDocumentById(UUID organizationId, UUID documentId);
 }

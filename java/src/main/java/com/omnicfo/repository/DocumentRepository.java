@@ -1,9 +1,12 @@
 package com.omnicfo.repository;
 
 import com.omnicfo.model.entity.Document;
+import com.omnicfo.model.enums.FileType;
+import com.omnicfo.model.enums.ProcessedStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,24 +41,29 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
     /**
      * Fetch documents for a tenant filtered by type, sorted by newest first.
      */
-    List<Document> findByOrganizationIdAndFileTypeOrderByUploadDateDesc(UUID organizationId, com.omnicfo.model.enums.FileType fileType);
+    List<Document> findByOrganizationIdAndFileTypeOrderByUploadDateDesc(UUID organizationId, FileType fileType);
 
     /**
      * Fetch top 10 documents in strict FIFO order (oldest first) matching processed status and file type.
      */
     List<Document> findTop10ByProcessedStatusAndFileTypeOrderByUploadDateAsc(
-        com.omnicfo.model.enums.ProcessedStatus processedStatus,
-        com.omnicfo.model.enums.FileType fileType
+        ProcessedStatus processedStatus,
+        FileType fileType
     );
 
     /**
      * Fetch top 5 documents in strict FIFO order (oldest first) matching processed status and file type.
      */
     List<Document> findTop5ByProcessedStatusAndFileTypeOrderByUploadDateAsc(
-        com.omnicfo.model.enums.ProcessedStatus processedStatus,
-        com.omnicfo.model.enums.FileType fileType
+        ProcessedStatus processedStatus,
+        FileType fileType
+    );
+
+    /**
+     * Fetch top 10 documents in strict FIFO order (oldest first) matching processed status across multiple file types.
+     */
+    List<Document> findTop10ByProcessedStatusAndFileTypeInOrderByUploadDateAsc(
+        ProcessedStatus processedStatus,
+        Collection<FileType> fileTypes
     );
 }
-
-
-

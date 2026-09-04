@@ -56,18 +56,17 @@ class DocumentServiceTest {
     void setUp() throws Exception {
         tenantId = UUID.randomUUID();
         testOrg = Organization.builder()
-            .id(tenantId)
-            .businessName("Acme Corp")
-            .createdAt(Instant.now())
-            .build();
+                .id(tenantId)
+                .businessName("Acme Corp")
+                .createdAt(Instant.now())
+                .build();
 
         byte[] content = "Invoice-Line-Item-Data-12345".getBytes(StandardCharsets.UTF_8);
         testFile = new MockMultipartFile(
-            "file",
-            "invoice_aug_2026.pdf",
-            "application/pdf",
-            content
-        );
+                "file",
+                "invoice_aug_2026.pdf",
+                "application/pdf",
+                content);
 
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         expectedHash = HexFormat.of().formatHex(md.digest(content));
@@ -78,7 +77,7 @@ class DocumentServiceTest {
     void uploadDocument_Success() {
         // Arrange
         when(organizationRepository.findById(tenantId)).thenReturn(Optional.of(testOrg));
-        when(documentRepository.existsByOrganizationIdAndFileHash(tenantId, expectedHash)).thenReturn(false);
+        when(documentRepository.findByOrganizationIdAndFileHash(tenantId, expectedHash)).thenReturn(Optional.empty());
 
         UUID generatedDocId = UUID.randomUUID();
         when(documentRepository.save(any(Document.class))).thenAnswer(invocation -> {
@@ -108,16 +107,56 @@ class DocumentServiceTest {
     }
 
     @Test
-    @DisplayName("Throws DuplicateDocumentException when file with same hash exists for tenant")
-    void uploadDocument_ThrowsDuplicateDocumentException() {
+    @DisplayName("Successfully allows re-submission when previous document is in FAILED status")
+    void uploadDocument_AllowsResubmissionOnFailedStatus() {
         // Arrange
+        UUID failedDocId = UUID.randomUUID();
+        Document existingFailedDoc = Document.builder()
+                .id(failedDocId)
+                .organization(testOrg)
+                .fileName("old_invoice.pdf")
+                .fileType(FileType.INVOICE)
+                .fileHash(expectedHash)
+                .processedStatus(ProcessedStatus.FAILED)
+                .build();
+
         when(organizationRepository.findById(tenantId)).thenReturn(Optional.of(testOrg));
-        when(documentRepository.existsByOrganizationIdAndFileHash(tenantId, expectedHash)).thenReturn(true);
+        when(documentRepository.findByOrganizationIdAndFileHash(tenantId, expectedHash))
+                .thenReturn(Optional.of(existingFailedDoc));
+        when(documentRepository.save(any(Document.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        DocumentUploadResponse response = documentService.uploadDocument(tenantId, testFile, "Invoice");
+
+        // Assert
+        assertThat(response).isNotNull();
+        assertThat(response.getDocumentId()).isEqualTo(failedDocId);
+        assertThat(response.getStatus()).isEqualTo(ProcessedStatus.PENDING);
+        assertThat(existingFailedDoc.getProcessedStatus()).isEqualTo(ProcessedStatus.PENDING);
+        verify(documentRepository).save(existingFailedDoc);
+    }
+
+    @Test
+    @DisplayName("Throws DuplicateDocumentException when file with same hash exists and is COMPLETED")
+    void uploadDocument_ThrowsDuplicateDocumentExceptionWhenCompleted() {
+        // Arrange
+        Document existingCompletedDoc = Document.builder()
+                .id(UUID.randomUUID())
+                .organization(testOrg)
+                .fileName("completed_invoice.pdf")
+                .fileType(FileType.INVOICE)
+                .fileHash(expectedHash)
+                .processedStatus(ProcessedStatus.COMPLETED)
+                .build();
+
+        when(organizationRepository.findById(tenantId)).thenReturn(Optional.of(testOrg));
+        when(documentRepository.findByOrganizationIdAndFileHash(tenantId, expectedHash))
+                .thenReturn(Optional.of(existingCompletedDoc));
 
         // Act & Assert
         assertThatThrownBy(() -> documentService.uploadDocument(tenantId, testFile, "Invoice"))
-            .isInstanceOf(DuplicateDocumentException.class)
-            .hasMessageContaining(expectedHash);
+                .isInstanceOf(DuplicateDocumentException.class)
+                .hasMessageContaining(expectedHash);
 
         verify(documentRepository, never()).save(any(Document.class));
     }
@@ -130,8 +169,8 @@ class DocumentServiceTest {
 
         // Act & Assert
         assertThatThrownBy(() -> documentService.uploadDocument(tenantId, testFile, "Invoice"))
-            .isInstanceOf(OrganizationNotFoundException.class)
-            .hasMessageContaining(tenantId.toString());
+                .isInstanceOf(OrganizationNotFoundException.class)
+                .hasMessageContaining(tenantId.toString());
 
         verify(documentRepository, never()).existsByOrganizationIdAndFileHash(any(), any());
         verify(documentRepository, never()).save(any());
@@ -143,7 +182,7 @@ class DocumentServiceTest {
         MockMultipartFile emptyFile = new MockMultipartFile("file", "empty.pdf", "application/pdf", new byte[0]);
 
         assertThatThrownBy(() -> documentService.uploadDocument(tenantId, emptyFile, "Invoice"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("empty");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("empty");
     }
 }
