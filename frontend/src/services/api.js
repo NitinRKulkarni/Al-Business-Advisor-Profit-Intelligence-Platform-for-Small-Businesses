@@ -172,12 +172,12 @@ export async function uploadAllDocuments(uploadsState, tenantId = DEFAULT_TENANT
  * Fetches list of uploaded documents from the backend for the tenant.
  */
 export async function getDocuments(tenantId = DEFAULT_TENANT_ID, fileType = '') {
-  const url = new URL(`${API_BASE_URL}/api/v1/files`)
+  let url = `${API_BASE_URL}/api/v1/files`
   if (fileType) {
-    url.searchParams.append('fileType', fileType)
+    url += `?fileType=${encodeURIComponent(fileType)}`
   }
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'X-Tenant-ID': tenantId,
@@ -246,12 +246,12 @@ export async function getDemandInsights(tenantId = DEFAULT_TENANT_ID) {
  * Fetches Invoices from the Java backend with live payment & reconciliation statuses.
  */
 export async function getInvoices(tenantId = DEFAULT_TENANT_ID, paymentStatus = '') {
-  const url = new URL(`${API_BASE_URL}/api/v1/invoices`)
+  let url = `${API_BASE_URL}/api/v1/invoices`
   if (paymentStatus) {
-    url.searchParams.append('paymentStatus', paymentStatus)
+    url += `?paymentStatus=${encodeURIComponent(paymentStatus)}`
   }
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'X-Tenant-ID': tenantId,
