@@ -2,7 +2,9 @@
  * Service to handle document uploads and API integration with the Spring Boot backend.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
+const API_BASE_URL = typeof import.meta.env.VITE_API_BASE_URL === 'string'
+  ? import.meta.env.VITE_API_BASE_URL
+  : (import.meta.env.DEV ? 'http://localhost:8080' : '')
 const DEFAULT_TENANT_ID = 'a0000000-0000-0000-0000-000000000001'
 
 /**
