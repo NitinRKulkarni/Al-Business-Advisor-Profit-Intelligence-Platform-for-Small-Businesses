@@ -142,12 +142,19 @@ CREATE TABLE IF NOT EXISTS bank_statements (
         UNIQUE (organization_id, txn_date, description, amount, balance)
 );
 
--- Add foreign key from invoices to bank_statements
-ALTER TABLE invoices 
-    ADD CONSTRAINT fk_invoices_matched_bank_statement 
-    FOREIGN KEY (matched_bank_statement_id) 
-    REFERENCES bank_statements(id) 
-    ON DELETE SET NULL;
+-- Add foreign key from invoices to bank_statements if not exists
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_invoices_matched_bank_statement'
+    ) THEN
+        ALTER TABLE invoices 
+            ADD CONSTRAINT fk_invoices_matched_bank_statement 
+            FOREIGN KEY (matched_bank_statement_id) 
+            REFERENCES bank_statements(id) 
+            ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- ==============================================================================
 -- Table: whatsapp_messages
@@ -280,3 +287,9 @@ CREATE INDEX IF NOT EXISTS idx_whatsapp_queries_doc ON whatsapp_queries(document
 CREATE INDEX IF NOT EXISTS idx_whatsapp_messages_doc ON whatsapp_messages(document_id);
 CREATE INDEX IF NOT EXISTS idx_whatsapp_insights_org ON whatsapp_insights(organization_id);
 
+-- ==============================================================================
+-- Seed Data: Default Multi-Tenant Organization Container
+-- ==============================================================================
+INSERT INTO organizations (id, business_name)
+VALUES ('a0000000-0000-0000-0000-000000000001', 'Team Sanskriti Enterprise')
+ON CONFLICT (id) DO NOTHING;

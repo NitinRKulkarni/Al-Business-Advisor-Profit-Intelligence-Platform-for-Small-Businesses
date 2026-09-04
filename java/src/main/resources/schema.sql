@@ -142,12 +142,19 @@ CREATE TABLE IF NOT EXISTS bank_statements (
         UNIQUE (organization_id, txn_date, description, amount, balance)
 );
 
--- Add foreign key from invoices to bank_statements
-ALTER TABLE invoices 
-    ADD CONSTRAINT fk_invoices_matched_bank_statement 
-    FOREIGN KEY (matched_bank_statement_id) 
-    REFERENCES bank_statements(id) 
-    ON DELETE SET NULL;
+-- Add foreign key from invoices to bank_statements if not exists
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'fk_invoices_matched_bank_statement'
+    ) THEN
+        ALTER TABLE invoices 
+            ADD CONSTRAINT fk_invoices_matched_bank_statement 
+            FOREIGN KEY (matched_bank_statement_id) 
+            REFERENCES bank_statements(id) 
+            ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- ==============================================================================
 -- Table: whatsapp_messages
@@ -178,7 +185,7 @@ CREATE TABLE IF NOT EXISTS whatsapp_messages (
 
 -- ==============================================================================
 -- Table: inventory_items
--- Stores individual product/SKU mentions extracted from WhatsApp chats & inventory uploads.
+-- Stores ground-truth product stock inventory uploaded via direct CSV sheets.
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS inventory_items (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -187,6 +194,9 @@ CREATE TABLE IF NOT EXISTS inventory_items (
     item_name VARCHAR(255) NOT NULL,
     quantity NUMERIC(12, 3),
     quantity_unit VARCHAR(50),
+    unit_price NUMERIC(15, 2) DEFAULT 0.00,
+    reorder_level NUMERIC(12, 3) DEFAULT 0.00,
+    category VARCHAR(100),
     mention_date VARCHAR(50),
     mention_time VARCHAR(50),
     description TEXT,
@@ -198,6 +208,38 @@ CREATE TABLE IF NOT EXISTS inventory_items (
         ON DELETE CASCADE,
 
     CONSTRAINT fk_inventory_items_organization 
+        FOREIGN KEY (organization_id) 
+        REFERENCES organizations(id) 
+        ON DELETE CASCADE
+);
+
+-- ==============================================================================
+-- Table: whatsapp_queries
+-- Stores structured customer inquiries, question intents, and requested items.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS whatsapp_queries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    document_id UUID NOT NULL,
+    organization_id UUID NOT NULL,
+    customer_name VARCHAR(255),
+    sender VARCHAR(255) NOT NULL,
+    raw_message TEXT NOT NULL,
+    intent VARCHAR(100) NOT NULL DEFAULT 'STOCK_INQUIRY',
+    item_demanded VARCHAR(255),
+    requested_quantity NUMERIC(12, 3),
+    requested_unit VARCHAR(50),
+    timeframe VARCHAR(100),
+    urgency_level VARCHAR(50) DEFAULT 'NORMAL',
+    sentiment VARCHAR(50) DEFAULT 'NEUTRAL',
+    structured_payload JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_whatsapp_queries_document 
+        FOREIGN KEY (document_id) 
+        REFERENCES documents(id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_whatsapp_queries_organization 
         FOREIGN KEY (organization_id) 
         REFERENCES organizations(id) 
         ON DELETE CASCADE
@@ -240,5 +282,14 @@ CREATE INDEX IF NOT EXISTS idx_bank_statements_org_status ON bank_statements(org
 CREATE INDEX IF NOT EXISTS idx_bank_statements_txn_date ON bank_statements(organization_id, txn_date);
 CREATE INDEX IF NOT EXISTS idx_inventory_items_org_item ON inventory_items(organization_id, item_name);
 CREATE INDEX IF NOT EXISTS idx_inventory_items_doc ON inventory_items(document_id);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_queries_org_item ON whatsapp_queries(organization_id, item_demanded);
+CREATE INDEX IF NOT EXISTS idx_whatsapp_queries_doc ON whatsapp_queries(document_id);
 CREATE INDEX IF NOT EXISTS idx_whatsapp_messages_doc ON whatsapp_messages(document_id);
 CREATE INDEX IF NOT EXISTS idx_whatsapp_insights_org ON whatsapp_insights(organization_id);
+
+-- ==============================================================================
+-- Seed Data: Default Multi-Tenant Organization Container
+-- ==============================================================================
+INSERT INTO organizations (id, business_name)
+VALUES ('a0000000-0000-0000-0000-000000000001', 'Team Sanskriti Enterprise')
+ON CONFLICT (id) DO NOTHING;
