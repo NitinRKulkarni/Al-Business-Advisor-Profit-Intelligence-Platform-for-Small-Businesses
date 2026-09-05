@@ -23,6 +23,37 @@ def parse_invoice_pdf(pdf_bytes: bytes, file_id: str) -> Invoice:
     invoice_number = _find_invoice_number(text) or "UNKNOWN"
     line_items = _parse_line_items(tables, text)
 
+    subtotal_val = _find_amount(
+        text,
+        ["subtotal (taxable value)", "subtotal", "sub total", "taxable amount",
+         "total amount (before tax)", "total amount before tax", "total amount", "total rate"],
+    )
+    tax_val = _find_tax(text)
+    total_tax_val = _find_amount(
+        text,
+        ["total amount with tax", "total with tax", "grand total",
+         "total payable", "amount payable", "net amount", "total amount"],
+    )
+
+    # Arithmetic reconciliation fallback
+    if total_tax_val is None and subtotal_val is not None:
+        if tax_val is not None:
+            total_tax_val = subtotal_val + tax_val
+        else:
+            total_tax_val = subtotal_val
+    elif subtotal_val is None and total_tax_val is not None:
+        if tax_val is not None:
+            subtotal_val = total_tax_val - tax_val
+        else:
+            subtotal_val = total_tax_val
+
+    # Line item aggregation fallback
+    if (total_tax_val is None or total_tax_val == 0) and line_items:
+        line_sum = sum((Decimal(str(li.total_rate)) for li in line_items if li.total_rate is not None), Decimal("0"))
+        if line_sum > 0:
+            subtotal_val = subtotal_val or line_sum
+            total_tax_val = line_sum + (tax_val or Decimal("0"))
+
     invoice = Invoice(
         file_id=file_id,
         invoice_id=invoice_number,
@@ -32,17 +63,9 @@ def parse_invoice_pdf(pdf_bytes: bytes, file_id: str) -> Invoice:
         customer_name=_find_customer_name(text),
         gst_number=_find_gst(text),
         line_items=line_items,
-        total_amount=_find_amount(
-            text,
-            ["total amount (before tax)", "total amount before tax",
-             "sub total", "subtotal", "taxable amount", "total amount", "total rate"],
-        ),
-        tax=_find_tax(text),
-        total_amount_with_tax=_find_amount(
-            text,
-            ["total amount with tax", "total with tax", "grand total",
-             "total payable", "amount payable", "net amount"],
-        ),
+        total_amount=subtotal_val,
+        tax=tax_val,
+        total_amount_with_tax=total_tax_val,
         raw_text=text,
     )
     return invoice
@@ -119,44 +142,48 @@ def _find_date(text: str, labels: List[str]) -> Optional[date]:
 
 def _find_tax(text: str) -> Optional[Decimal]:
     single = _find_amount(
-        text, ["gst / tax", "gst/tax", "tax amount", "total tax", "total gst"]
+        text, ["gst / tax", "gst/tax", "tax amount", "total tax", "total gst", "tax", "gst"]
     )
     if single is not None:
         return single
 
-    currency = r"(?:₹|Rs\.?|\$|■|)"
+    currency = r"(?:₹|Rs\.?|INR|\$|■||)"
     component_re = re.compile(
-        rf"^\s*(?:c\s*gst|s\s*gst|i\s*gst|gst)\b"
-        rf"(?:[\s@:\-–]*[0-9.]+\s*%?)?"
-        rf"[\s:\-–]*{currency}?\s*([0-9][0-9,]*\.?[0-9]*)",
+        rf"(?:c\s*gst|s\s*gst|i\s*gst|gst|tax)\b"
+        rf"(?:[^\n:]*?)?"
+        rf"[\s:\-–=]+"
+        rf"{currency}?\s*([0-9][0-9,]*\.?[0-9]*)",
         re.IGNORECASE | re.MULTILINE,
     )
     total = Decimal("0")
     found = False
     for m in component_re.finditer(text):
         val = _to_decimal(m.group(1))
-        if val is not None:
+        if val is not None and val > 0:
             total += val
             found = True
     if found:
         return total
 
-    return _find_amount(text, ["tax"])
+    return None
 
 
 def _find_amount(text: str, labels: List[str]) -> Optional[Decimal]:
-    currency = r"(?:₹|Rs\.?|\$|■|)"
+    currency = r"(?:₹|Rs\.?|INR|\$|■||)"
     for label in labels:
         m = re.search(
-            rf"^\s*{re.escape(label)}\b"
-            rf"(?:[\s:\-–]*\([^)]*\))?"
-            rf"[\s:\-–]*{currency}?\s*{currency}?\s*"
+            rf"{re.escape(label)}\b"
+            rf"(?:[^\n:]*?)?"
+            rf"[\s:\-–=]+"
+            rf"{currency}?\s*{currency}?\s*"
             rf"([0-9][0-9,]*\.?[0-9]*)",
             text,
             re.IGNORECASE | re.MULTILINE,
         )
         if m:
-            return _to_decimal(m.group(1))
+            val = _to_decimal(m.group(1))
+            if val is not None:
+                return val
     return None
 
 

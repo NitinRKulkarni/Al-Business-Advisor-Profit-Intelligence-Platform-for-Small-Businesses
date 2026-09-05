@@ -192,29 +192,22 @@ def _find_tax(text: str) -> Optional[Decimal]:
 def _find_amount(text: str, labels: List[str]) -> Optional[Decimal]:
     """
     Find a currency amount that follows one of the given labels.
-
-    The label is anchored to the start of a line (allowing leading whitespace)
-    so that a short label like "tax" does not accidentally match inside a
-    longer line such as "Total Amount With Tax: 4248.00". Labels are tried in
-    the order given, so callers should list the most specific label first.
     """
-    # Currency glyphs, including the black-square fallback (■) that some PDFs
-    # emit when the ₹ glyph has no embedded font.
-    currency = r"(?:₹|Rs\.?|\$|■|�)"
+    currency = r"(?:₹|Rs\.?|INR|\$|■|)"
     for label in labels:
         m = re.search(
-            # label at line start, then bracketed notes (e.g. "(18%)"),
-            # separators, and currency glyphs up to the number — but NOT
-            # another word, so "Tax" won't reach into "...With Tax: 4248".
-            rf"^\s*{re.escape(label)}\b"
-            rf"(?:[\s:\-–]*\([^)]*\))?"      # optional "(18%)" note
-            rf"[\s:\-–]*{currency}?\s*{currency}?\s*"
+            rf"{re.escape(label)}\b"
+            rf"(?:[^\n:]*?)?"
+            rf"[\s:\-–=]+"
+            rf"{currency}?\s*{currency}?\s*"
             rf"([0-9][0-9,]*\.?[0-9]*)",
             text,
             re.IGNORECASE | re.MULTILINE,
         )
         if m:
-            return _to_decimal(m.group(1))
+            val = _to_decimal(m.group(1))
+            if val is not None:
+                return val
     return None
 
 
