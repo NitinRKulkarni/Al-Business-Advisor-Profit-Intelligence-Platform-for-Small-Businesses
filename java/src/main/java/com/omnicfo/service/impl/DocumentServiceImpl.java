@@ -262,23 +262,10 @@ public class DocumentServiceImpl implements DocumentService {
         log.info("Retrying processing for tenantId={}, docId={}", organizationId, documentId);
         Document document = getDocumentById(organizationId, documentId);
 
-        // Reset status to PENDING so the background schedulers (AiDocumentTriggerService / BankStatementProcessingService) pick it up
+        // Reset status to PENDING so background schedulers pick it up
         document.setProcessedStatus(ProcessedStatus.PENDING);
         document.setUploadDate(java.time.Instant.now());
         Document saved = documentRepository.save(document);
-
-        // If it's an Inventory CSV, synchronously process it
-        if (saved.getFileType() == FileType.INVENTORY && saved.getFileData() != null) {
-            try {
-                inventoryCsvService.processInventoryCsv(organizationId, saved.getFileName(), saved.getFileData());
-                saved.setProcessedStatus(ProcessedStatus.PROCESSED);
-                saved = documentRepository.save(saved);
-            } catch (Exception e) {
-                log.error("Failed to re-process inventory CSV docId={}: {}", documentId, e.getMessage());
-                saved.setProcessedStatus(ProcessedStatus.FAILED);
-                saved = documentRepository.save(saved);
-            }
-        }
 
         return DocumentResponseDTO.builder()
                 .documentId(saved.getId())
