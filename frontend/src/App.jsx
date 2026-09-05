@@ -1971,13 +1971,21 @@ function App() {
   }
 
   useEffect(() => {
-    // 1. Initial fresh load on workspace mount / login
-    handleRefreshAll(false)
+    if (isAuthenticated) {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+      setToast(null)
+      showToast(`Welcome to ${brandName || 'Team Sanskriti'} Enterprise!`, 'success', 4000)
+
+      // 1. Initial fresh load on workspace mount / login
+      handleRefreshAll(false)
+    }
 
     // 2. Periodic background auto-refresh every 1 hour (3600000ms)
     const ONE_HOUR_MS = 60 * 60 * 1000
     const interval = setInterval(() => {
-      handleRefreshAll(false)
+      if (isAuthenticated) {
+        handleRefreshAll(false)
+      }
     }, ONE_HOUR_MS)
 
     return () => {
@@ -2117,8 +2125,9 @@ function App() {
   const handleLogoutConfirm = () => {
     setShowLogoutModal(false)
     setShowProfileMenu(false)
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    setToast(null)
     contextLogout()
-    showToast('Signed out of Team Sanskriti.', 'info', 4000)
   }
 
   const handleCreateInvoiceSubmit = (e) => {

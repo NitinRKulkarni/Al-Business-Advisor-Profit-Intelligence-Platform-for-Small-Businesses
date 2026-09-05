@@ -440,6 +440,59 @@ INVOICE_DEFINITIONS = [
         "total": "39825.00",
         # UNPAID
         "payment_date": None,
+    },
+    # September 2026 Invoices (Recent past up to 2 days ago)
+    {
+        "num": "INV-2026-021",
+        "date": "2026-09-01",
+        "due": "2026-09-15",
+        "customer": CUSTOMERS[0],
+        "items": [
+            ("Basmati Rice Royal", "100", "95.00", "9500.00"),
+            ("Whole Wheat Sharbati Atta", "150", "46.00", "6900.00"),
+            ("Amul Pure Cow Ghee", "20", "620.00", "12400.00"),
+        ],
+        "subtotal": "28800.00",
+        "tax_rate": 0.08,
+        "tax": "2304.00",
+        "total": "31104.00",
+        # UNPAID
+        "payment_date": None,
+    },
+    {
+        "num": "INV-2026-022",
+        "date": "2026-09-02",
+        "due": "2026-09-16",
+        "customer": CUSTOMERS[3],
+        "items": [
+            ("Toor Dal Premium", "100", "145.00", "14500.00"),
+            ("Fortune Refined Sunflower Oil", "60", "155.00", "9300.00"),
+            ("Refined Crystal Sugar", "150", "44.00", "6600.00"),
+        ],
+        "subtotal": "30400.00",
+        "tax_rate": 0.05,
+        "tax": "1520.00",
+        "total": "31920.00",
+        # UNPAID
+        "payment_date": None,
+    },
+    {
+        "num": "INV-2026-023",
+        "date": "2026-09-03",
+        "due": "2026-09-17",
+        "customer": CUSTOMERS[4],
+        "items": [
+            ("Amul Processed Cheese Block 1kg", "20", "490.00", "9800.00"),
+            ("Amul Butter Pasteurized 500g", "40", "275.00", "11000.00"),
+            ("Maggi 2-Minute Masala Noodles", "350", "14.00", "4900.00"),
+        ],
+        "subtotal": "25700.00",
+        "tax_rate": 0.12,
+        "tax": "3084.00",
+        "total": "28784.00",
+        "payment_date": "2026-09-04",
+        "payment_method": "UPI",
+        "payment_remark": "UPI/INV-2026-023/BalajiHyper",
     }
 ]
 
@@ -655,6 +708,14 @@ def generate_bank_statement_csv():
         {"date": "2026-08-26", "desc": "UPI/INV-2026-016/SharmaTraders/Part1", "type": "CREDIT", "amount": Decimal("15000.00")},
         {"date": "2026-08-28", "desc": "Supplier Restock - Pulses & Grains Direct Mandi", "type": "DEBIT", "amount": Decimal("68000.00")},
         {"date": "2026-08-31", "desc": "Monthly Staff Payroll & Warehouse Wages", "type": "DEBIT", "amount": Decimal("78000.00")},
+
+        # --- SEPTEMBER 2026 (Recent Past - Up to 2 days ago) ---
+        {"date": "2026-09-01", "desc": "Office & Warehouse Rent - Peenya Industrial Park", "type": "DEBIT", "amount": Decimal("35000.00")},
+        {"date": "2026-09-02", "desc": "Supplier Restock - Dairy & Edible Oils Direct", "type": "DEBIT", "amount": Decimal("42000.00")},
+        {"date": "2026-09-03", "desc": "Warehouse Electricity Bill - BESCOM", "type": "DEBIT", "amount": Decimal("11500.00")},
+        {"date": "2026-09-03", "desc": "NEFT-CR-INV-2026-017-GuptaKirana-Part", "type": "CREDIT", "amount": Decimal("20000.00")},
+        {"date": "2026-09-04", "desc": "UPI/INV-2026-023/BalajiHyper", "type": "CREDIT", "amount": Decimal("28784.00")},
+        {"date": "2026-09-04", "desc": "Local Logistics & Delivery Fleet Fuel", "type": "DEBIT", "amount": Decimal("6200.00")},
     ]
 
     for ev in events:
@@ -732,6 +793,16 @@ def generate_whatsapp_chats():
 
 30/08/2026, 11:00 - Ananya Retail Hub: Send 50 packets Surf Excel 2kg, 30 bottles Dettol Handwash, 40 bottles Tomato Ketchup.
 30/08/2026, 11:05 - You: Generated INV-2026-020 for INR 39,825.00.
+
+01/09/2026, 09:30 - Ramesh General Stores: Namaste, we need 100kg Basmati Rice, 150kg Atta, and 20L Cow Ghee.
+01/09/2026, 09:35 - You: Invoice INV-2026-021 issued for INR 31,104.00.
+
+02/09/2026, 10:15 - Kavya Provisions & Mart: Urgent dispatch: 100kg Toor Dal, 60L Sunflower Oil, 150kg Sugar.
+02/09/2026, 10:20 - You: Processed on INV-2026-022 for INR 31,920.00.
+
+03/09/2026, 14:00 - Balaji Hypermarket Wholesale: Send 20 blocks Cheese, 40 packets Butter, 350 packets Maggi Noodles.
+03/09/2026, 14:05 - You: Invoice INV-2026-023 created for INR 28,784.00.
+04/09/2026, 16:30 - Balaji Hypermarket Wholesale: Paid full INR 28,784 via UPI. Ref: UPI/INV-2026-023/BalajiHyper.
 """
     txt_path = os.path.join(TEST_DATASETS_DIR, "2_whatsapp_customer_chats.txt")
     with open(txt_path, "w", encoding="utf-8") as f:
