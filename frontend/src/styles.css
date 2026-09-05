@@ -74,18 +74,75 @@ button {
   position: fixed;
   top: 24px;
   right: 24px;
-  z-index: 200;
+  z-index: 9999;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding: 12px 18px;
-  background: #10b981;
+  background: #1e293b;
   color: #ffffff;
   font-weight: 600;
   font-size: 13px;
   border-radius: 10px;
-  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  max-width: 420px;
+}
+
+.toast-notification.success {
+  background: #065f46;
+  border: 1px solid #10b981;
+  color: #ecfdf5;
+}
+
+.toast-notification.error {
+  background: #7f1d1d;
+  border: 1px solid #ef4444;
+  color: #fef2f2;
+}
+
+.toast-notification.info {
+  background: #1e3a8a;
+  border: 1px solid #3b82f6;
+  color: #eff6ff;
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  color: currentColor;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: auto;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity 0.15s ease;
+}
+
+.toast-close-btn:hover {
+  opacity: 1;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.6);
+  width: 100%;
+  animation: toastCountdown 5s linear forwards;
+}
+
+@keyframes toastCountdown {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 @keyframes slideInRight {

@@ -1653,7 +1653,26 @@ function App() {
   const [whatsappError, setWhatsappError] = useState('')
   const [submitted, setSubmitted] = useState(null)
   const [mobileNav, setMobileNav] = useState(false)
-  const [toastMessage, setToastMessage] = useState('')
+  const [toast, setToast] = useState(null)
+  const toastTimerRef = useRef(null)
+
+  const showToast = (message, type = 'info', duration = 5000) => {
+    if (!message) return
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current)
+    }
+    setToast({ message, type, id: Date.now() })
+    toastTimerRef.current = setTimeout(() => {
+      setToast(null)
+    }, duration)
+  }
+
+  const closeToast = () => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current)
+    }
+    setToast(null)
+  }
 
   // Enterprise Authentication State
   const [showLogoutModal, setShowLogoutModal] = useState(false)
@@ -1681,7 +1700,7 @@ function App() {
   const [bankStmtState, setBankStmtState] = useState({ data: [], isLoading: true, error: null })
 
   // Dedicated Fetch Handlers with Comprehensive Error & Retry Management
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (isManual = false) => {
     setInvoicesState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
       const data = await getInvoices()
@@ -1703,11 +1722,11 @@ function App() {
     } catch (err) {
       const msg = err.message || 'Failed to fetch invoices from backend'
       setInvoicesState((prev) => ({ ...prev, isLoading: false, error: msg }))
-      setToastMessage(`Invoices error: ${msg}`)
+      if (isManual) showToast(`Invoices error: ${msg}`, 'error', 5000)
     }
   }
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (isManual = false) => {
     setDocsState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
       const docs = await getDocuments()
@@ -1715,11 +1734,11 @@ function App() {
     } catch (err) {
       const msg = err.message || 'Failed to fetch document queue from backend'
       setDocsState((prev) => ({ ...prev, isLoading: false, error: msg }))
-      setToastMessage(`Documents error: ${msg}`)
+      if (isManual) showToast(`Documents error: ${msg}`, 'error', 5000)
     }
   }
 
-  const fetchDemandIntelligence = async () => {
+  const fetchDemandIntelligence = async (isManual = false) => {
     setInsightsState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
       const data = await getDemandInsights()
@@ -1727,11 +1746,11 @@ function App() {
     } catch (err) {
       const msg = err.message || 'Failed to fetch AI demand insights from backend'
       setInsightsState((prev) => ({ ...prev, isLoading: false, error: msg }))
-      setToastMessage(`AI Insights error: ${msg}`)
+      if (isManual) showToast(`AI Insights error: ${msg}`, 'error', 5000)
     }
   }
 
-  const fetchBankStatements = async () => {
+  const fetchBankStatements = async (isManual = false) => {
     setBankStmtState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
       const data = await getBankStatements()
@@ -1739,6 +1758,7 @@ function App() {
     } catch (err) {
       const msg = err.message || 'Failed to fetch bank statements'
       setBankStmtState((prev) => ({ ...prev, isLoading: false, error: msg }))
+      if (isManual) showToast(`Bank statements error: ${msg}`, 'error', 5000)
     }
   }
 
@@ -1754,7 +1774,10 @@ function App() {
       fetchDemandIntelligence()
       fetchBankStatements()
     }, 6000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(interval)
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    }
   }, [])
 
   const updateFiles = (key, files, error = '') => {
@@ -1824,9 +1847,9 @@ function App() {
 
         const duplicateErr = errorList.find((e) => e.status === 409)
         if (duplicateErr) {
-          setToastMessage(`Backend Notice: ${duplicateErr.error}`)
+          showToast(`Backend Notice: ${duplicateErr.error}`, 'error', 5000)
         } else {
-          setToastMessage(`Upload finished with ${errorList.length} issue(s).`)
+          showToast(`Upload finished with ${errorList.length} issue(s).`, 'error', 5000)
         }
       }
 
@@ -1838,29 +1861,27 @@ function App() {
           message: `Successfully indexed ${fileCountText} [${categories}] into PostgreSQL. Results updated in dashboard.`
         })
         if (errorList.length === 0) {
-          setToastMessage(`✓ Successfully uploaded and queued ${fileCountText} in PostgreSQL!`)
+          showToast(`✓ Successfully uploaded and queued ${fileCountText} in PostgreSQL!`, 'success', 5000)
         }
         // State cleanup: Clear staging area so uploaded files disappear from queue
         setUploads(initialUploads)
         setErrors({})
 
-        // Auto-dismiss the success banner and toast after 5 seconds
+        // Auto-dismiss the success banner after 5 seconds
         setTimeout(() => {
           setSubmitted(null)
-          setToastMessage('')
         }, 5000)
       }
 
       await Promise.all([
-        fetchDocuments(),
-        fetchDemandIntelligence(),
-        fetchInvoices(),
-        fetchBankStatements(),
+        fetchDocuments(true),
+        fetchDemandIntelligence(true),
+        fetchInvoices(true),
+        fetchBankStatements(true),
       ])
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
-      setToastMessage(`Upload encountered errors: ${err.message}`)
-      setTimeout(() => setToastMessage(''), 6000)
+      showToast(`Upload encountered errors: ${err.message}`, 'error', 5000)
       if (uploads.whatsapp.length > 0) {
         setWhatsappStatus('error')
         setWhatsappError(err.message)
@@ -1879,22 +1900,19 @@ function App() {
       ...prev,
       data: prev.data.map(inv => inv.id === id ? { ...inv, status: 'paid', paymentStatus: 'PAID' } : inv)
     }))
-    setToastMessage(`Invoice ${id} marked as PAID!`)
-    setTimeout(() => setToastMessage(''), 4000)
+    showToast(`Invoice ${id} marked as PAID!`, 'success', 5000)
   }
 
   const handleSendReminder = (id) => {
     const inv = (invoicesState.data || []).find(i => i.id === id)
-    setToastMessage(`Payment reminder sent to ${inv ? inv.customer : 'customer'}!`)
-    setTimeout(() => setToastMessage(''), 4000)
+    showToast(`Payment reminder sent to ${inv ? inv.customer : 'customer'}!`, 'info', 5000)
   }
 
   const handleLogoutConfirm = () => {
     setShowLogoutModal(false)
     setShowProfileMenu(false)
     contextLogout()
-    setToastMessage('Signed out of Team Sanskriti.')
-    setTimeout(() => setToastMessage(''), 4000)
+    showToast('Signed out of Team Sanskriti.', 'info', 4000)
   }
 
   const handleCreateInvoiceSubmit = (e) => {
@@ -1919,8 +1937,7 @@ function App() {
     setNewInvAmount('')
     setNewInvDueDate('')
     setShowCreateInvoiceModal(false)
-    setToastMessage(`Invoice ${newInv.id} created for ${newInv.customer}!`)
-    setTimeout(() => setToastMessage(''), 4000)
+    showToast(`Invoice ${newInv.id} created for ${newInv.customer}!`, 'success', 5000)
   }
 
   const handleExportReport = () => {
@@ -1939,8 +1956,7 @@ function App() {
     a.download = `Team-Sanskriti-Vyapaar-Mitra-Financial-Report.json`
     a.click()
     URL.revokeObjectURL(url)
-    setToastMessage('Report exported to your device!')
-    setTimeout(() => setToastMessage(''), 4000)
+    showToast('Report exported to your device!', 'info', 5000)
   }
 
   // PROTECTED ROUTE GATE: If user is not authenticated, render Team Sanskriti LoginPage
@@ -1950,11 +1966,13 @@ function App() {
 
   return (
     <div className="app-shell">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="toast-notification">
-          <Icon name="check" size={16} />
-          <span>{toastMessage}</span>
+      {/* Dynamic Auto-Dismissing Toast Notification */}
+      {toast && (
+        <div key={toast.id} className={`toast-notification ${toast.type || 'info'}`}>
+          <Icon name={toast.type === 'error' ? 'alert-triangle' : toast.type === 'success' ? 'check' : 'info'} size={16} />
+          <span>{toast.message}</span>
+          <button type="button" className="toast-close-btn" onClick={closeToast} title="Dismiss">✕</button>
+          <div className="toast-progress" />
         </div>
       )}
 
