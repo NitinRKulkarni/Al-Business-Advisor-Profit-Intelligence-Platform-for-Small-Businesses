@@ -66,17 +66,21 @@ public class PaymentReconciliationService {
             Optional<Invoice> invoiceOpt = invoiceRepository.findByOrganizationIdAndInvoiceNumberIgnoreCase(orgId, candidateInvoiceNumber);
 
             if (invoiceOpt.isPresent()) {
-                applyReconciliation(statement, invoiceOpt.get());
-                return true;
+                Invoice candidate = invoiceOpt.get();
+                if (!"PAID".equalsIgnoreCase(candidate.getPaymentStatus())) {
+                    applyReconciliation(statement, candidate);
+                    return true;
+                }
             }
         }
 
-        // 2. Fallback: Search DB for any invoice whose invoiceNumber appears inside the description
+        // 2. Fallback: Search DB for any unpaid invoice whose invoiceNumber appears inside the description
         List<Invoice> candidates = invoiceRepository.findCandidatesByDescription(orgId, description);
-        if (!candidates.isEmpty()) {
-            Invoice bestMatch = candidates.get(0);
-            applyReconciliation(statement, bestMatch);
-            return true;
+        for (Invoice candidate : candidates) {
+            if (!"PAID".equalsIgnoreCase(candidate.getPaymentStatus())) {
+                applyReconciliation(statement, candidate);
+                return true;
+            }
         }
 
         return false;

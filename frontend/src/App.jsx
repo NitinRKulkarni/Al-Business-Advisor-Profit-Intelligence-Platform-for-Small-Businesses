@@ -495,7 +495,7 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
     let matchesFilter = true
     if (filter === 'all') matchesFilter = inv.status !== 'paid'
     else if (filter === 'overdue') matchesFilter = inv.status === 'overdue'
-    else if (filter === 'due-soon') matchesFilter = inv.status === 'due-soon' || inv.status === 'partially-paid'
+    else if (filter === 'due-soon') matchesFilter = (inv.status === 'due-soon' || inv.status === 'partially-paid') && inv.status !== 'overdue'
     else if (filter === 'paid') matchesFilter = inv.status === 'paid'
 
     const custText = (inv.customer || inv.customerName || '').toLowerCase()
@@ -675,7 +675,10 @@ function AIInsightsWidget({ onNavigateUploads, invoices = [], backendDocs = [], 
     )
   }
 
-  const invoiceCount = invoices.length
+  const unpaidInvoices = invoices.filter(inv => inv.status !== 'paid')
+  const overdueInvoices = invoices.filter(inv => inv.status === 'overdue')
+  const invoiceCount = unpaidInvoices.length
+  const overdueCount = overdueInvoices.length
   const totalBackendDocs = backendDocs.length
 
   return (
@@ -708,7 +711,7 @@ function AIInsightsWidget({ onNavigateUploads, invoices = [], backendDocs = [], 
           <div className="insight-content">
             <div className="insight-tag emerald">Receivables Status</div>
             <h3>{invoiceCount > 0 ? `${invoiceCount} Pending Unpaid Invoice(s)` : '0 Pending Unpaid Invoices'}</h3>
-            <p>{invoiceCount > 0 ? `${invoiceCount} invoice document(s) synced from PostgreSQL backend database staged for payment reconciliation.` : 'All accounts are currently up to date with zero outstanding receivables or overdue customer invoices.'}</p>
+            <p>{invoiceCount > 0 ? `${invoiceCount} pending receivable invoice(s) tracked (${overdueCount} overdue) staged for payment reconciliation.` : 'All accounts are currently up to date with zero outstanding receivables or overdue customer invoices.'}</p>
           </div>
         </article>
 
@@ -1870,14 +1873,16 @@ function App() {
         const isPartial = pStatus === 'PARTIALLY_PAID' || pStatus === 'PARTIAL'
         
         const dueDateStr = inv.dueDate ? String(inv.dueDate).split('T')[0] : ''
+        const isPastDue = Boolean(dueDateStr && dueDateStr !== 'No Due Date' && dueDateStr < todayStr)
+        
         let status = 'due-soon'
         
         if (isPaid) {
           status = 'paid'
+        } else if (isPastDue) {
+          status = 'overdue'
         } else if (isPartial) {
           status = 'partially-paid'
-        } else if (dueDateStr && dueDateStr < todayStr) {
-          status = 'overdue'
         } else {
           status = 'due-soon'
         }
@@ -1897,6 +1902,7 @@ function App() {
           amount: typeof rawAmount === 'string' ? parseFloat(rawAmount.replace(/,/g, '')) : Number(rawAmount),
           paidAmount: parseFloat(inv.paidAmount || inv.paid_amount || 0),
           status: status,
+          isPartial: isPartial,
           paymentStatus: pStatus,
           isBackendUploaded: true,
         }
@@ -2119,13 +2125,19 @@ function App() {
     e.preventDefault()
     if (!newInvCustomer || !newInvAmount) return
 
+    const dueDateStr = newInvDueDate || '2026-09-15'
+    const todayStr = new Date().toISOString().split('T')[0]
+    const isPastDue = Boolean(dueDateStr && dueDateStr < todayStr)
+
     const newInv = {
       id: `INV-2026-00${(invoicesState.data || []).length + 1}`,
       customer: newInvCustomer,
-      issueDate: new Date().toISOString().split('T')[0],
-      dueDate: newInvDueDate || '2026-09-15',
+      issueDate: todayStr,
+      dueDate: dueDateStr,
       amount: parseFloat(newInvAmount) || 0,
-      status: 'due-soon',
+      paidAmount: 0,
+      status: isPastDue ? 'overdue' : 'due-soon',
+      isPartial: false,
       paymentStatus: 'UNPAID',
     }
 
@@ -2260,7 +2272,8 @@ function App() {
         <nav className="main-nav" aria-label="Main navigation">
           <span className="nav-label">Organization</span>
           {navItems.map((item) => {
-            const badgeValue = item.badgeKey === 'uploads' ? (dataPoints > 0 ? `${dataPoints}` : null) : (item.id === 'invoices' ? `${(invoicesState.data || []).length}` : item.badge)
+            const pendingCount = (invoicesState.data || []).filter(i => i.status !== 'paid').length
+            const badgeValue = item.badgeKey === 'uploads' ? (dataPoints > 0 ? `${dataPoints}` : null) : (item.id === 'invoices' ? `${pendingCount}` : item.badge)
             return (
               <button
                 type="button"
@@ -2484,7 +2497,7 @@ function App() {
                     const paidInvAmt = invoices.filter(inv => (inv.status || inv.paymentStatus || '').toLowerCase() === 'paid')
                                               .reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.paidAmount || inv.totalAmountWithTax) || 0), 0)
                     const unpaidInvAmt = invoices.filter(inv => (inv.status || inv.paymentStatus || '').toLowerCase() !== 'paid')
-                                                .reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.totalAmountWithTax) || 0), 0)
+                                                .reduce((acc, inv) => acc + (parseFloat((inv.amount || inv.totalAmountWithTax) - (inv.paidAmount || 0)) || 0), 0)
 
                     // Real bank statement transaction sums
                     const bankDebits = bankStatements

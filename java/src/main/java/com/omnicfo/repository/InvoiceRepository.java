@@ -21,6 +21,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
     Optional<Invoice> findByDocumentId(UUID documentId);
 
-    @Query("SELECT i FROM Invoice i WHERE i.organizationId = :orgId AND LOWER(:description) LIKE CONCAT('%', LOWER(i.invoiceNumber), '%') AND i.invoiceNumber IS NOT NULL AND LENGTH(i.invoiceNumber) >= 3")
+    @Query("SELECT i FROM Invoice i WHERE i.organizationId = :orgId AND (i.paymentStatus IS NULL OR UPPER(i.paymentStatus) != 'PAID') AND LOWER(:description) LIKE CONCAT('%', LOWER(i.invoiceNumber), '%') AND i.invoiceNumber IS NOT NULL AND LENGTH(i.invoiceNumber) >= 5")
     List<Invoice> findCandidatesByDescription(@Param("orgId") UUID orgId, @Param("description") String description);
 }
