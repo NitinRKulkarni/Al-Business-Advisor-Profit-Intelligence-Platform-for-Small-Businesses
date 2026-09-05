@@ -119,36 +119,93 @@ async def process_image_invoice(raw_bytes: bytes, document_id: str, organization
                 from receipt_extraction.extractor import process_receipt
                 extraction_result = process_receipt(tmp_file_path, out_dir, ocr_engine=selected_engine)
                 data_dict = extraction_result.to_dict() if hasattr(extraction_result, "to_dict") else {}
-                receipt_data = data_dict.get("receipt_data", {})
+                raw_text = data_dict.get("raw_text") or (extraction_result.raw_text if hasattr(extraction_result, "raw_text") else "")
 
+                # Import robust regex parsers
+                from python_service.modules.pdf_invoice.parser import (
+                    _find_invoice_number, _find_customer_name, _find_gst, _find_date, _find_amount, _find_tax
+                )
+
+                # 1. Invoice Number
+                inv_num = (
+                    data_dict.get("invoice_number")
+                    or data_dict.get("receipt_number")
+                    or _find_invoice_number(raw_text)
+                    or f"IMG-{document_id[:8].upper()}"
+                )
+
+                # 2. Customer / Merchant Name
+                cust_name = (
+                    data_dict.get("customer_name")
+                    or _find_customer_name(raw_text)
+                    or data_dict.get("vendor_name")
+                    or "Image Receipt Customer"
+                )
+
+                # 3. GST Number
+                gst_num = (
+                    data_dict.get("gstin")
+                    or data_dict.get("tax_id")
+                    or _find_gst(raw_text)
+                )
+
+                # 4. Dates
+                inv_date = data_dict.get("date") or _find_date(raw_text, ["invoice date", "date"])
+                due_date = _find_date(raw_text, ["due date"])
+
+                # 5. Amounts
+                subtotal = (
+                    data_dict.get("subtotal")
+                    or _find_amount(raw_text, ["subtotal (taxable value)", "subtotal", "sub total", "taxable amount", "total amount (before tax)"])
+                )
+                tax_amt = (
+                    data_dict.get("tax")
+                    or _find_tax(raw_text)
+                )
+                total_amt = (
+                    data_dict.get("total")
+                    or _find_amount(raw_text, ["total amount with tax", "total with tax", "grand total", "total payable", "amount payable", "total"])
+                )
+
+                # Arithmetic reconciliation
+                if total_amt is None and subtotal is not None:
+                    total_amt = float(subtotal) + (float(tax_amt) if tax_amt else 0.0)
+                elif subtotal is None and total_amt is not None:
+                    subtotal = float(total_amt) - (float(tax_amt) if tax_amt else 0.0) if tax_amt else float(total_amt)
+
+                # 6. Line Items
+                raw_items = data_dict.get("items") or []
                 line_items = [
                     {
                         "description": item.get("description", "Item"),
                         "quantity": float(item.get("quantity") or 1.0),
                         "rate_per_unit": float(item.get("unit_price") or 0.0) if item.get("unit_price") is not None else None,
-                        "total_rate": float(item.get("total_price") or 0.0) if item.get("total_price") is not None else None,
+                        "total_rate": float(item.get("amount") or item.get("total_price") or 0.0) if (item.get("amount") or item.get("total_price")) is not None else None,
                     }
-                    for item in receipt_data.get("line_items", [])
+                    for item in raw_items
                 ]
 
-                subtotal = float(receipt_data.get("subtotal") or 0.0) if receipt_data.get("subtotal") is not None else None
-                tax_amt = float(receipt_data.get("tax_amount") or 0.0) if receipt_data.get("tax_amount") is not None else None
-                total_amt = float(receipt_data.get("total_amount") or 0.0) if receipt_data.get("total_amount") is not None else (subtotal or 0.0)
+                # If total is still missing or 0, aggregate from line items
+                if (total_amt is None or total_amt == 0) and line_items:
+                    line_sum = sum((li["total_rate"] for li in line_items if li.get("total_rate") is not None), 0.0)
+                    if line_sum > 0:
+                        subtotal = subtotal or line_sum
+                        total_amt = line_sum + (float(tax_amt) if tax_amt else 0.0)
 
                 unified_invoice = {
-                    "invoice_number": receipt_data.get("receipt_number") or receipt_data.get("invoice_number") or f"IMG-{document_id[:8].upper()}",
-                    "invoice_date": receipt_data.get("date"),
-                    "due_date": None,
-                    "customer_name": receipt_data.get("merchant_name") or receipt_data.get("vendor_name") or "Image Receipt Customer",
-                    "gst_number": receipt_data.get("tax_id") or receipt_data.get("gstin"),
-                    "total_amount": subtotal,
-                    "tax": tax_amt,
-                    "total_amount_with_tax": total_amt,
+                    "invoice_number": str(inv_num),
+                    "invoice_date": str(inv_date) if inv_date else None,
+                    "due_date": str(due_date) if due_date else None,
+                    "customer_name": str(cust_name),
+                    "gst_number": str(gst_num) if gst_num else None,
+                    "total_amount": float(subtotal) if subtotal is not None else 0.0,
+                    "tax": float(tax_amt) if tax_amt is not None else 0.0,
+                    "total_amount_with_tax": float(total_amt) if total_amt is not None else 0.0,
                     "line_items": line_items,
                 }
                 confidence = float(data_dict.get("confidence", 85.0)) if data_dict.get("confidence") is not None else 85.0
                 raw_ocr_result = data_dict
-                logger.info(f"Local OCR pipeline extracted invoice: {unified_invoice.get('invoice_number')}")
+                logger.info(f"Local OCR pipeline extracted invoice: {unified_invoice.get('invoice_number')}, total={unified_invoice.get('total_amount_with_tax')}, customer={unified_invoice.get('customer_name')}")
         except Exception as e:
             logger.error(f"Tier 2 Local OCR extraction failed: {e}", exc_info=True)
         finally:
