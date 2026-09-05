@@ -55,4 +55,13 @@ public interface DocumentService {
      * @return Document entity
      */
     com.omnicfo.model.entity.Document getDocumentById(UUID organizationId, UUID documentId);
+
+    /**
+     * Resets a document's status to PENDING to trigger automated re-processing.
+     *
+     * @param organizationId UUID of the tenant organization
+     * @param documentId UUID of the document
+     * @return updated DocumentResponseDTO
+     */
+    DocumentResponseDTO retryDocument(UUID organizationId, UUID documentId);
 }

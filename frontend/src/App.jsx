@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getDocuments, uploadAllDocuments, uploadDocument, fetchDocumentBlob, getDocumentViewUrl, getDemandInsights, getInvoices, getBankStatements } from './services/api'
+import { getDocuments, uploadAllDocuments, uploadDocument, retryDocument, fetchDocumentBlob, getDocumentViewUrl, getDemandInsights, getInvoices, getBankStatements } from './services/api'
 import { useAuth } from './context/AuthContext'
 import LoginPage from './components/LoginPage'
 import { KpiSkeletonGrid, TableRowSkeleton, ChartSkeleton, InsightSkeleton } from './components/Skeleton'
@@ -998,32 +998,18 @@ function DocumentPreviewModal({ doc, onClose }) {
 function UploadedDocumentsSection({ documents = [], isLoading = false, error = null, onRetry = null, onRefresh, isRefreshing, onNavigateUploads, onPreview }) {
   const [filter, setFilter] = useState('ALL')
   const [retryingDocId, setRetryingDocId] = useState(null)
-  const retryInputRef = useRef(null)
-  const [targetRetryDoc, setTargetRetryDoc] = useState(null)
 
-  const handleRetryClick = (doc) => {
-    setTargetRetryDoc(doc)
-    if (retryInputRef.current) {
-      retryInputRef.current.value = null
-      retryInputRef.current.click()
-    }
-  }
-
-  const handleRetryFileSelected = async (event) => {
-    const file = event.target.files?.[0]
-    if (!file || !targetRetryDoc) return
-
+  const handleRetryClick = async (doc) => {
+    if (!doc?.documentId) return
     try {
-      setRetryingDocId(targetRetryDoc.documentId)
-      await uploadDocument(file, targetRetryDoc.fileType || 'Invoice')
+      setRetryingDocId(doc.documentId)
+      await retryDocument(doc.documentId)
       if (onRefresh) await onRefresh()
     } catch (err) {
-      console.error('Re-upload failed:', err)
-      alert(`Re-upload failed: ${err.message || 'Unknown error'}`)
+      console.error('Retry processing failed:', err)
+      alert(`Retry failed: ${err.message || 'Unknown error'}`)
     } finally {
       setRetryingDocId(null)
-      setTargetRetryDoc(null)
-      if (event.target) event.target.value = null
     }
   }
 
@@ -1054,14 +1040,6 @@ function UploadedDocumentsSection({ documents = [], isLoading = false, error = n
 
   return (
     <section className="invoices-card uploaded-docs-section" style={{ marginTop: '24px' }}>
-      {/* Hidden file input for retrying failed documents */}
-      <input
-        ref={retryInputRef}
-        type="file"
-        style={{ display: 'none' }}
-        onChange={handleRetryFileSelected}
-      />
-
       <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <span className="section-kicker">Live PostgreSQL Ingestion & AI Queue</span>
@@ -1245,7 +1223,7 @@ function UploadedDocumentsSection({ documents = [], isLoading = false, error = n
                             }}
                           >
                             <Icon name="refresh" size={13} />
-                            {isCurrentRetrying ? 'Uploading...' : 'Retry'}
+                            {isCurrentRetrying ? 'Retrying...' : 'Retry'}
                           </button>
                         )}
                       </div>

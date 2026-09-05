@@ -328,4 +328,30 @@ export async function getBankStatements(tenantId = DEFAULT_TENANT_ID) {
   return response.json()
 }
 
+/**
+ * Retries processing for an existing failed or uploaded document without re-uploading the file.
+ */
+export async function retryDocument(documentId, tenantId = DEFAULT_TENANT_ID) {
+  const url = `${API_BASE_URL}/api/v1/files/${documentId}/retry`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'X-Tenant-ID': tenantId,
+    },
+  })
+
+  if (!response.ok) {
+    let errorDetail = response.statusText
+    try {
+      const errJson = await response.json()
+      errorDetail = errJson.message || errJson.error || errorDetail
+    } catch {
+      // ignore
+    }
+    throw new Error(`Retry failed (${response.status}): ${errorDetail}`)
+  }
+
+  return response.json()
+}
+
 

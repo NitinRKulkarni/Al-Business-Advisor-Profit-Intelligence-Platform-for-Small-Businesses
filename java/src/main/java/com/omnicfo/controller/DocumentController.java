@@ -142,4 +142,21 @@ public class DocumentController {
                 .header(org.springframework.http.HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
                 .body(fileBytes);
     }
+
+    /**
+     * Retries processing for a previously uploaded or failed document.
+     *
+     * @param organizationId tenant organization UUID provided via header
+     * @param documentId UUID of the document
+     * @return 200 OK with updated DocumentResponseDTO
+     */
+    @PostMapping("/{documentId}/retry")
+    public ResponseEntity<DocumentResponseDTO> retryDocument(
+        @RequestHeader("X-Tenant-ID") UUID organizationId,
+        @org.springframework.web.bind.annotation.PathVariable("documentId") UUID documentId
+    ) {
+        log.info("Received request to retry processing for docId={} and tenant={}", documentId, organizationId);
+        DocumentResponseDTO response = documentService.retryDocument(organizationId, documentId);
+        return ResponseEntity.ok(response);
+    }
 }
