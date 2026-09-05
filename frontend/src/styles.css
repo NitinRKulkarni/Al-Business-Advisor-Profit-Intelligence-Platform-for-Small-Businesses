@@ -1829,6 +1829,59 @@ button {
   background: #f8fafc;
 }
 
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.status-pill i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-pill.overdue {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.status-pill.overdue i {
+  background: #dc2626;
+}
+
+.status-pill.due-soon {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-pill.due-soon i {
+  background: #f59e0b;
+}
+
+.status-pill.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+.status-pill.paid i {
+  background: #16a34a;
+}
+
+.status-pill.partial,
+.status-pill.partially-paid {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.status-pill.partial i,
+.status-pill.partially-paid i {
+  background: #4f46e5;
+}
+
 .empty-table {
   text-align: center;
   padding: 40px !important;

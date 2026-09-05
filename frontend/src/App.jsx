@@ -486,23 +486,37 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
     )
   }
 
+  const unpaidInvoices = invoices.filter(inv => inv.status !== 'paid')
+  const overdueInvoices = invoices.filter(inv => inv.status === 'overdue')
+  const dueSoonInvoices = invoices.filter(inv => inv.status === 'due-soon' || inv.status === 'partially-paid')
+  const paidInvoices = invoices.filter(inv => inv.status === 'paid')
+
   const filteredInvoices = invoices.filter(inv => {
-    const matchesFilter = filter === 'all' ? true : inv.status === filter
-    const matchesSearch = inv.customer.toLowerCase().includes(search.toLowerCase()) || inv.id.toLowerCase().includes(search.toLowerCase())
+    let matchesFilter = true
+    if (filter === 'all') matchesFilter = inv.status !== 'paid'
+    else if (filter === 'overdue') matchesFilter = inv.status === 'overdue'
+    else if (filter === 'due-soon') matchesFilter = inv.status === 'due-soon' || inv.status === 'partially-paid'
+    else if (filter === 'paid') matchesFilter = inv.status === 'paid'
+
+    const custText = (inv.customer || inv.customerName || '').toLowerCase()
+    const idText = (inv.invoiceNumber || inv.id || '').toLowerCase()
+    const q = search.toLowerCase().trim()
+    const matchesSearch = !q || custText.includes(q) || idText.includes(q)
+
     return matchesFilter && matchesSearch
   })
 
-  const totalOutstanding = invoices.reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0)
-  const overdueTotal = invoices.filter(inv => inv.status === 'overdue').reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0)
-  const dueSoonTotal = invoices.filter(inv => inv.status === 'due-soon').reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0)
+  const totalOutstanding = unpaidInvoices.reduce((acc, inv) => acc + (parseFloat(inv.amount - (inv.paidAmount || 0)) || 0), 0)
+  const overdueTotal = overdueInvoices.reduce((acc, inv) => acc + (parseFloat(inv.amount - (inv.paidAmount || 0)) || 0), 0)
+  const dueSoonTotal = dueSoonInvoices.reduce((acc, inv) => acc + (parseFloat(inv.amount - (inv.paidAmount || 0)) || 0), 0)
 
   return (
     <div className="invoices-card">
       <div className="invoices-card-header">
         <div>
           <div className="title-with-badge">
-            <h2>Unpaid Invoices</h2>
-            <span className="count-pill green">{invoices.length} Pending</span>
+            <h2>Unpaid Invoices & Receivables</h2>
+            <span className="count-pill green">{unpaidInvoices.length} Pending</span>
           </div>
           <p>Track pending client balances, overdue accounts, and payment reminders</p>
         </div>
@@ -520,9 +534,10 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
           </div>
 
           <div className="filter-tabs">
-            <button className={`tab-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All ({invoices.length})</button>
-            <button className={`tab-btn overdue ${filter === 'overdue' ? 'active' : ''}`} onClick={() => setFilter('overdue')}>Overdue ({invoices.filter(i => i.status === 'overdue').length})</button>
-            <button className={`tab-btn duesoon ${filter === 'due-soon' ? 'active' : ''}`} onClick={() => setFilter('due-soon')}>Due Soon ({invoices.filter(i => i.status === 'due-soon').length})</button>
+            <button className={`tab-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>All Pending ({unpaidInvoices.length})</button>
+            <button className={`tab-btn overdue ${filter === 'overdue' ? 'active' : ''}`} onClick={() => setFilter('overdue')}>Overdue ({overdueInvoices.length})</button>
+            <button className={`tab-btn duesoon ${filter === 'due-soon' ? 'active' : ''}`} onClick={() => setFilter('due-soon')}>Due Soon ({dueSoonInvoices.length})</button>
+            <button className={`tab-btn ${filter === 'paid' ? 'active' : ''}`} onClick={() => setFilter('paid')}>Settled ({paidInvoices.length})</button>
           </div>
         </div>
       </div>
@@ -536,12 +551,12 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
         <div className="summary-divider" />
         <div className="summary-item">
           <span>Overdue Accounts</span>
-          <strong>{formatCurrency(overdueTotal, currency)} <small>({invoices.filter(i => i.status === 'overdue').length} invoices)</small></strong>
+          <strong>{formatCurrency(overdueTotal, currency)} <small>({overdueInvoices.length} invoices)</small></strong>
         </div>
         <div className="summary-divider" />
         <div className="summary-item">
-          <span>Due Within 7 Days</span>
-          <strong>{formatCurrency(dueSoonTotal, currency)} <small>({invoices.filter(i => i.status === 'due-soon').length} invoices)</small></strong>
+          <span>Due Soon / Active</span>
+          <strong>{formatCurrency(dueSoonTotal, currency)} <small>({dueSoonInvoices.length} invoices)</small></strong>
         </div>
       </div>
 
@@ -567,8 +582,8 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
                 <td colSpan="7" style={{ padding: '8px 0' }}>
                   <EmptyState
                     icon="📄"
-                    title="No Unpaid Invoices Found"
-                    description="All customer balances are currently settled, or no unpaid invoice records are in the system."
+                    title={filter === 'paid' ? "No Settled Invoices Found" : "No Unpaid Invoices Found"}
+                    description={filter === 'paid' ? "No invoices have been marked as paid/settled yet." : "All customer balances are currently settled, or no unpaid invoice records are in the system."}
                     actionLabel="Create Invoice"
                     onAction={onAddInvoice}
                   />
@@ -577,31 +592,52 @@ function UnpaidInvoicesSection({ invoices = [], isLoading = false, error = null,
             </tbody>
           ) : (
             <tbody>
-              {filteredInvoices.map((inv) => (
-                <tr key={inv.id}>
-                  <td className="inv-id"><strong>{inv.id}</strong></td>
-                  <td className="inv-customer"><strong>{inv.customer}</strong></td>
-                  <td className="inv-date">{inv.issueDate}</td>
-                  <td className="inv-date"><span>{inv.dueDate}</span></td>
-                  <td className="inv-amount"><strong>{formatCurrency(inv.amount, currency)}</strong></td>
-                  <td>
-                    <span className={`status-pill ${inv.status}`}>
-                      <i />
-                      {inv.status}
-                    </span>
-                  </td>
-                  <td className="text-right">
-                    <button
-                      type="button"
-                      className={`reminder-btn ${remindedMap[inv.id] ? 'sent' : ''}`}
-                      onClick={() => handleReminder(inv.id)}
-                    >
-                      <Icon name={remindedMap[inv.id] ? 'check' : 'send'} size={13} />
-                      <span>{remindedMap[inv.id] ? 'Reminder Sent' : 'Send Reminder'}</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {filteredInvoices.map((inv) => {
+                const isPaid = inv.status === 'paid'
+                const isOverdue = inv.status === 'overdue'
+                const isPartial = inv.status === 'partially-paid'
+                
+                let pillClass = 'due-soon'
+                let pillText = 'Due Soon'
+                if (isPaid) { pillClass = 'paid'; pillText = 'Paid' }
+                else if (isOverdue) { pillClass = 'overdue'; pillText = 'Overdue' }
+                else if (isPartial) { pillClass = 'partial'; pillText = 'Partial' }
+
+                return (
+                  <tr key={inv.id}>
+                    <td className="inv-id"><strong>{inv.invoiceNumber || inv.id}</strong></td>
+                    <td className="inv-customer"><strong>{inv.customerName || inv.customer}</strong></td>
+                    <td className="inv-date">{inv.issueDate}</td>
+                    <td className="inv-date"><span>{inv.dueDate}</span></td>
+                    <td className="inv-amount">
+                      <strong>{formatCurrency(inv.amount, currency)}</strong>
+                      {isPartial && <div style={{ fontSize: '11px', color: '#16a34a' }}>Paid: {formatCurrency(inv.paidAmount, currency)}</div>}
+                    </td>
+                    <td>
+                      <span className={`status-pill ${pillClass}`}>
+                        <i />
+                        {pillText}
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      {isPaid ? (
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#16a34a', padding: '4px 8px' }}>
+                          ✓ Settled
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className={`reminder-btn ${remindedMap[inv.id] ? 'sent' : ''}`}
+                          onClick={() => handleReminder(inv.id)}
+                        >
+                          <Icon name={remindedMap[inv.id] ? 'check' : 'send'} size={13} />
+                          <span>{remindedMap[inv.id] ? 'Reminder Sent' : 'Send Reminder'}</span>
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           )}
         </table>
@@ -1513,12 +1549,15 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
                 cardBorder = '#fcd34d'
               }
 
-              const score = item.urgency_score || item.urgencyScore || 50
+              const score = item.urgency_score ?? item.urgencyScore ?? (rLevel === 'HIGH' ? 88 : rLevel === 'MEDIUM' ? 62 : 30)
               const itemName = item.item_name || item.itemName || 'Product'
-              const demandQty = item.total_quantity_demanded || item.totalQuantityDemanded || 0
-              const unit = item.unit || 'units'
-              const freq = item.demand_frequency || item.demandFrequency || 1
-              const reason = item.reason || 'Calculated from customer request velocity.'
+              const demandQty = item.demanded_quantity ?? item.demandedQuantity ?? item.total_quantity_demanded ?? item.totalQuantityDemanded ?? item.requested_quantity ?? item.quantity ?? 0
+              const currentStock = item.current_stock ?? item.currentStock ?? 0
+              const shortfall = item.shortfall ?? (demandQty > currentStock ? Math.round((demandQty - currentStock) * 10) / 10 : 0)
+              const unit = item.unit || item.quantityUnit || item.quantity_unit || 'units'
+              const freq = item.demand_frequency ?? item.demandFrequency ?? item.inquiry_count ?? item.inquiryCount ?? 1
+              const custName = item.customer_name || item.customerName || 'Customer'
+              const reason = item.reason || (shortfall > 0 ? `Demand of ${demandQty} ${unit} exceeds stock of ${currentStock} ${unit}.` : `Buffer stock monitored for ${itemName}.`)
 
               return (
                 <div
@@ -1538,8 +1577,15 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
                     </span>
                   </div>
 
-                  <div style={{ fontSize: '12px', color: '#475569', marginBottom: '10px' }}>
-                    <strong>{demandQty} {unit}</strong> requested across <strong>{freq}</strong> inquiry point(s).
+                  <div style={{ fontSize: '12px', color: '#475569', marginBottom: '8px' }}>
+                    <strong>{demandQty} {unit}</strong> requested by <em>{custName}</em> ({freq} inquiry point{freq > 1 ? 's' : ''}).
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#64748b', marginBottom: '8px', background: '#f8fafc', padding: '6px 8px', borderRadius: '6px' }}>
+                    <span>Current Stock: <strong>{currentStock} {unit}</strong></span>
+                    <span style={{ color: shortfall > 0 ? '#b91c1c' : '#166534' }}>
+                      Shortfall: <strong>{shortfall > 0 ? `${shortfall} ${unit}` : '0 (Covered)'}</strong>
+                    </span>
                   </div>
 
                   <div style={{ marginBottom: '10px' }}>
@@ -1594,18 +1640,23 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
                 </tr>
               ) : (
                 reorderRecs.map((rec, idx) => {
-                  const p = (rec.priority || 'NORMAL').toUpperCase()
+                  const p = (rec.priority || (rec.risk_level === 'HIGH' || rec.riskLevel === 'HIGH' ? 'CRITICAL' : 'HIGH')).toUpperCase()
                   let pBg = '#f1f5f9'
                   let pColor = '#475569'
                   if (p === 'CRITICAL') { pBg = '#fee2e2'; pColor = '#991b1b' }
-                  else if (p === 'MODERATE') { pBg = '#fef3c7'; pColor = '#92400e' }
+                  else if (p === 'HIGH' || p === 'MODERATE') { pBg = '#fef3c7'; pColor = '#92400e' }
+                  else { pBg = '#dcfce7'; pColor = '#166534' }
+
+                  const reorderQty = rec.suggested_reorder_qty ?? rec.suggestedReorderQty ?? rec.reorder_quantity ?? rec.reorderQty ?? (rec.shortfall ? Math.round(rec.shortfall * 1.2) : 10)
+                  const unit = rec.unit || rec.quantityUnit || rec.quantity_unit || 'units'
+                  const action = rec.supplier_action || rec.supplierAction || `Issue Purchase Order for ${reorderQty} ${unit} of ${rec.item_name || rec.itemName}`
 
                   return (
                     <tr key={idx}>
                       <td className="inv-customer"><strong>{rec.item_name || rec.itemName}</strong></td>
                       <td>
                         <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
-                          {rec.suggested_reorder_qty || rec.suggestedReorderQty} {rec.unit || 'units'}
+                          {reorderQty} {unit}
                         </span>
                       </td>
                       <td className="inv-date">{rec.recommended_by_date || rec.recommendedByDate || 'Within 7 days'}</td>
@@ -1616,7 +1667,7 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
                       </td>
                       <td>
                         <span style={{ fontSize: '12px', color: '#475569' }}>
-                          {rec.supplier_action || rec.supplierAction || 'Replenish stock'}
+                          {action}
                         </span>
                       </td>
                     </tr>
@@ -1638,17 +1689,22 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
             </h3>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {unmetDemands.map((unm, idx) => (
-              <div key={idx} style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #fef3c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <strong style={{ color: '#0f172a', fontSize: '14px' }}>{unm.customer || 'Customer'}:</strong>{' '}
-                  <span style={{ color: '#475569', fontSize: '13px' }}>Requested {unm.quantity_requested || 1} units of <strong>{unm.item_name || unm.itemName}</strong> ({unm.date || 'Recent'})</span>
+            {unmetDemands.map((unm, idx) => {
+              const reqQty = unm.quantity_requested ?? unm.quantityRequested ?? unm.demanded_quantity ?? 1
+              const sFall = unm.shortfall ?? reqQty
+              const lossAmt = unm.potential_revenue_loss ?? unm.potentialRevenueLoss ?? (sFall * 100)
+              return (
+                <div key={idx} style={{ background: '#ffffff', padding: '12px 16px', borderRadius: '8px', border: '1px solid #fef3c7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <strong style={{ color: '#0f172a', fontSize: '14px' }}>{unm.customer || 'Customer'}:</strong>{' '}
+                    <span style={{ color: '#475569', fontSize: '13px' }}>Requested {reqQty} units of <strong>{unm.item_name || unm.itemName}</strong> ({unm.date || 'Recent'})</span>
+                  </div>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#b45309', background: '#fef3c7', padding: '4px 8px', borderRadius: '6px' }}>
+                    Opportunity: ₹{Number(lossAmt).toFixed(2)}
+                  </span>
                 </div>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#b45309', background: '#fef3c7', padding: '4px 8px', borderRadius: '6px' }}>
-                  Opportunity: ₹{(unm.potential_revenue_loss || 500).toFixed(2)}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </section>
       )}
@@ -1804,17 +1860,44 @@ function App() {
     setInvoicesState((prev) => ({ ...prev, isLoading: true, error: null }))
     try {
       const data = await getInvoices()
+      const now = new Date()
+      const todayStr = now.toISOString().split('T')[0]
+
       const mappedInvoices = (data || []).map((inv) => {
-        const rawAmount = inv.totalAmountWithTax || inv.totalAmount || 0
-        const isPaid = (inv.paymentStatus || '').toUpperCase() === 'PAID'
+        const rawAmount = inv.totalAmountWithTax || inv.totalAmount || inv.amount || 0
+        const pStatus = (inv.paymentStatus || inv.status || 'UNPAID').toUpperCase()
+        const isPaid = pStatus === 'PAID'
+        const isPartial = pStatus === 'PARTIALLY_PAID' || pStatus === 'PARTIAL'
+        
+        const dueDateStr = inv.dueDate ? String(inv.dueDate).split('T')[0] : ''
+        let status = 'due-soon'
+        
+        if (isPaid) {
+          status = 'paid'
+        } else if (isPartial) {
+          status = 'partially-paid'
+        } else if (dueDateStr && dueDateStr < todayStr) {
+          status = 'overdue'
+        } else {
+          status = 'due-soon'
+        }
+
+        const invNum = inv.invoiceNumber || inv.invoice_number || (inv.id ? (String(inv.id).startsWith('INV') ? inv.id : `INV-${String(inv.id).slice(0, 8).toUpperCase()}`) : 'INV')
+        const cust = inv.customerName || inv.customer_name || inv.customer || 'Customer'
+        const issueDate = inv.invoiceDate || inv.invoice_date || inv.issueDate || (inv.createdAt ? String(inv.createdAt).split('T')[0] : '—')
+
         return {
-          id: inv.invoiceNumber || (inv.id ? inv.id.slice(0, 8).toUpperCase() : 'INV'),
-          customer: inv.customerName || 'Customer',
-          issueDate: inv.invoiceDate ? String(inv.invoiceDate).split('T')[0] : '—',
-          dueDate: inv.dueDate ? String(inv.dueDate).split('T')[0] : 'Pending Due Date',
+          id: invNum,
+          dbId: inv.id,
+          invoiceNumber: invNum,
+          customer: cust,
+          customerName: cust,
+          issueDate: typeof issueDate === 'string' ? issueDate.split('T')[0] : '—',
+          dueDate: dueDateStr || 'No Due Date',
           amount: typeof rawAmount === 'string' ? parseFloat(rawAmount.replace(/,/g, '')) : Number(rawAmount),
-          status: isPaid ? 'paid' : 'due-soon',
-          paymentStatus: inv.paymentStatus || 'UNPAID',
+          paidAmount: parseFloat(inv.paidAmount || inv.paid_amount || 0),
+          status: status,
+          paymentStatus: pStatus,
           isBackendUploaded: true,
         }
       })
