@@ -87,10 +87,27 @@ public class DemandInsightController {
         Map<String, Object> summary = getMapFromObject(demandIntelMap.get("summary"));
         if (summary.isEmpty() && !mappedItems.isEmpty()) {
             summary.put("totalSkusDemanded", mappedItems.size());
+            summary.put("total_skus_demanded", mappedItems.size());
             summary.put("highRiskStockouts", 0);
+            summary.put("high_risk_stockouts", 0);
             summary.put("suggestedReordersCount", mappedItems.size());
+            summary.put("suggested_reorders_count", mappedItems.size());
             summary.put("fastestMovingItem", mappedItems.get(0).get("itemName"));
+            summary.put("fastest_moving_item", mappedItems.get(0).get("itemName"));
             summary.put("totalDemandVolume", mappedItems.size());
+            summary.put("total_demand_volume", mappedItems.size());
+        } else if (!summary.isEmpty()) {
+            Object totalSkus = summary.getOrDefault("totalSkusDemanded", summary.get("total_skus_demanded"));
+            Object stockouts = summary.getOrDefault("highRiskStockouts", summary.get("high_risk_stockouts"));
+            Object reorders = summary.getOrDefault("suggestedReordersCount", summary.get("suggested_reorders_count"));
+            Object fastest = summary.getOrDefault("fastestMovingItem", summary.get("fastest_moving_item"));
+            Object volume = summary.getOrDefault("totalDemandVolume", summary.get("total_demand_volume"));
+
+            if (totalSkus != null) { summary.put("totalSkusDemanded", totalSkus); summary.put("total_skus_demanded", totalSkus); }
+            if (stockouts != null) { summary.put("highRiskStockouts", stockouts); summary.put("high_risk_stockouts", stockouts); }
+            if (reorders != null) { summary.put("suggestedReordersCount", reorders); summary.put("suggested_reorders_count", reorders); }
+            if (fastest != null) { summary.put("fastestMovingItem", fastest); summary.put("fastest_moving_item", fastest); }
+            if (volume != null) { summary.put("totalDemandVolume", volume); summary.put("total_demand_volume", volume); }
         }
 
         List<Map<String, Object>> stockoutRisks = getListFromObject(demandIntelMap.get("stockout_risks"));

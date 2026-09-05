@@ -1274,18 +1274,21 @@ function DemandIntelligenceSection({ demandData, onRefresh, isRefreshing, onNavi
     )
   }
 
-  const summary = demandData?.summary || {
-    totalSkusDemanded: 0,
-    highRiskStockouts: 0,
-    suggestedReordersCount: 0,
-    fastestMovingItem: 'None',
-    totalDemandVolume: 0,
-  }
-
+  const rawSummary = demandData?.summary || {}
+  const inventoryItems = demandData?.inventoryItems || []
   const stockoutRisks = demandData?.stockoutRisks || []
   const reorderRecs = demandData?.reorderRecommendations || []
   const unmetDemands = demandData?.unmetDemands || []
-  const inventoryItems = demandData?.inventoryItems || []
+
+  const totalVolFallback = inventoryItems.reduce((acc, it) => acc + (parseFloat(it.quantity || it.qty) || 0), 0)
+
+  const summary = {
+    totalSkusDemanded: rawSummary.totalSkusDemanded ?? rawSummary.total_skus_demanded ?? (inventoryItems.length || 0),
+    highRiskStockouts: rawSummary.highRiskStockouts ?? rawSummary.high_risk_stockouts ?? (stockoutRisks.length || 0),
+    suggestedReordersCount: rawSummary.suggestedReordersCount ?? rawSummary.suggested_reorders_count ?? (reorderRecs.length || inventoryItems.length || 0),
+    fastestMovingItem: rawSummary.fastestMovingItem || rawSummary.fastest_moving_item || (inventoryItems[0]?.itemName || inventoryItems[0]?.item_name || 'None'),
+    totalDemandVolume: rawSummary.totalDemandVolume ?? rawSummary.total_demand_volume ?? Math.round(totalVolFallback),
+  }
 
   const filteredRisks = filterRisk === 'ALL'
     ? stockoutRisks
