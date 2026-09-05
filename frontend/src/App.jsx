@@ -63,48 +63,146 @@ const navItems = [
   { id: 'settings', label: 'Settings', icon: 'help' },
 ]
 
-// Dynamic Trend Data Generator based on active period and ingested invoice metrics
-function generateTrendData(period, invoices = []) {
-  const countMap = {
-    '7d': 7,
-    '14d': 14,
-    '30d': 4,
-    '90d': 3,
-  }
-  const count = countMap[period] || 7
-  const now = new Date()
-  
-  // Calculate base revenue/expenses from real invoices if present
-  const totalInvoiceRev = invoices.reduce((acc, inv) => acc + (parseFloat(inv.amount) || 0), 0)
-  const paidInvoiceRev = invoices.filter(inv => inv.status === 'paid' || inv.paymentStatus === 'PAID')
-                                .reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.paidAmount) || 0), 0)
+// Dynamic Trend Data Generator based on active period, bank statements, and invoices
+function generateTrendData(period, invoices = [], bankStatements = []) {
+  const dailyMap = {}
 
-  const items = []
-  for (let i = count - 1; i >= 0; i--) {
-    let dateLabel = ''
-    if (period === '7d') {
+  // 1. Process Bank Statements (High accuracy daily cash flow)
+  if (Array.isArray(bankStatements) && bankStatements.length > 0) {
+    for (const stmt of bankStatements) {
+      if (!stmt.txnDate) continue
+      const dateKey = typeof stmt.txnDate === 'string' ? stmt.txnDate.split('T')[0] : new Date(stmt.txnDate).toISOString().split('T')[0]
+      if (!dailyMap[dateKey]) {
+        dailyMap[dateKey] = { revenue: 0, expenses: 0 }
+      }
+
+      const amt = parseFloat(stmt.amount) || 0
+      const type = (stmt.txnType || '').toUpperCase()
+      const desc = (stmt.description || '').toLowerCase()
+
+      if (type === 'DEBIT' || type === 'DR' || type === 'WITHDRAWAL') {
+        dailyMap[dateKey].expenses += amt
+      } else if (type === 'CREDIT' || type === 'CR' || type === 'DEPOSIT') {
+        // Exclude opening balance from revenue trend inflow
+        if (!desc.includes('opening balance')) {
+          dailyMap[dateKey].revenue += amt
+        }
+      }
+    }
+  }
+
+  // 2. Process Invoices (If bank statements are not uploaded or to supplement invoice revenue)
+  if (Array.isArray(invoices) && invoices.length > 0) {
+    for (const inv of invoices) {
+      const invDate = inv.invoiceDate || inv.dueDate || (inv.createdAt ? inv.createdAt.split('T')[0] : null)
+      if (!invDate) continue
+      const dateKey = typeof invDate === 'string' ? invDate.split('T')[0] : new Date(invDate).toISOString().split('T')[0]
+
+      if (!dailyMap[dateKey]) {
+        dailyMap[dateKey] = { revenue: 0, expenses: 0 }
+      }
+
+      const status = (inv.paymentStatus || inv.status || '').toLowerCase()
+      const amt = parseFloat(inv.paidAmount || inv.totalAmountWithTax || inv.amount) || 0
+
+      // If bank statement not present, populate revenue from paid/recorded invoices
+      if ((!bankStatements || bankStatements.length === 0) && (status === 'paid' || status === 'completed')) {
+        dailyMap[dateKey].revenue += amt
+      }
+    }
+  }
+
+  const allDates = Object.keys(dailyMap).sort()
+
+  // Fallback if no transactions exist
+  if (allDates.length === 0) {
+    const countMap = { '7d': 7, '14d': 14, '30d': 4, '90d': 3 }
+    const count = countMap[period] || 7
+    const now = new Date()
+    const emptyItems = []
+    for (let i = count - 1; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      dateLabel = d.toLocaleDateString('en-US', { weekday: 'short' })
-    } else if (period === '14d') {
-      dateLabel = `Day ${count - i}`
-    } else if (period === '30d') {
-      dateLabel = `Week ${count - i}`
-    } else {
-      dateLabel = `Month ${count - i}`
+      emptyItems.push({
+        date: period === '7d' || period === '14d' ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : `Period ${count - i}`,
+        revenue: 0,
+        expenses: 0,
+      })
     }
-
-    // Allocate real revenue dynamically across the period
-    const dayRev = count > 0 && totalInvoiceRev > 0 ? Math.round((paidInvoiceRev / count) * (1 + (i % 3) * 0.2)) : 0
-    const dayExp = count > 0 && totalInvoiceRev > 0 ? Math.round((dayRev * 0.4)) : 0
-
-    items.push({
-      date: dateLabel,
-      revenue: dayRev,
-      expenses: dayExp,
-    })
+    return emptyItems
   }
 
+  // Anchor window to the latest transaction date in data
+  const latestDateStr = allDates[allDates.length - 1]
+  const latestDate = new Date(latestDateStr)
+
+  if (period === '7d' || period === '14d') {
+    const daysCount = period === '7d' ? 7 : 14
+    const items = []
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const targetDate = new Date(latestDate)
+      targetDate.setDate(targetDate.getDate() - i)
+      const dateKey = targetDate.toISOString().split('T')[0]
+      const dayData = dailyMap[dateKey] || { revenue: 0, expenses: 0 }
+
+      items.push({
+        date: targetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        revenue: Math.round(dayData.revenue),
+        expenses: Math.round(dayData.expenses),
+      })
+    }
+    return items
+  }
+
+  if (period === '30d') {
+    // 4 Weekly Buckets covering the last 30 days
+    const items = []
+    for (let w = 3; w >= 0; w--) {
+      let weekRev = 0
+      let weekExp = 0
+      const weekEndDate = new Date(latestDate)
+      weekEndDate.setDate(weekEndDate.getDate() - (w * 7))
+      const weekStartDate = new Date(weekEndDate)
+      weekStartDate.setDate(weekStartDate.getDate() - 6)
+
+      for (const [dStr, dVal] of Object.entries(dailyMap)) {
+        const itemDate = new Date(dStr)
+        if (itemDate >= weekStartDate && itemDate <= weekEndDate) {
+          weekRev += dVal.revenue
+          weekExp += dVal.expenses
+        }
+      }
+
+      items.push({
+        date: `${weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEndDate.toLocaleDateString('en-US', { day: 'numeric' })}`,
+        revenue: Math.round(weekRev),
+        expenses: Math.round(weekExp),
+      })
+    }
+    return items
+  }
+
+  // 90d: 3 Monthly Buckets
+  const items = []
+  for (let m = 2; m >= 0; m--) {
+    const bucketDate = new Date(latestDate.getFullYear(), latestDate.getMonth() - m, 1)
+    const monthKey = `${bucketDate.getFullYear()}-${String(bucketDate.getMonth() + 1).padStart(2, '0')}`
+    let monthRev = 0
+    let monthExp = 0
+
+    for (const [dStr, dVal] of Object.entries(dailyMap)) {
+      if (dStr.startsWith(monthKey)) {
+        monthRev += dVal.revenue
+        monthExp += dVal.expenses
+      }
+    }
+
+    items.push({
+      date: bucketDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+      revenue: Math.round(monthRev),
+      expenses: Math.round(monthExp),
+    })
+  }
   return items
 }
 
@@ -180,7 +278,7 @@ function getExtension(name) {
 }
 
 // Component: Trend Chart (Interactive SVG with Dynamic Values)
-function TrendChart({ period, setPeriod, viewMode, setViewMode, currency, invoices = [], isLoading = false, error = null, onRetry = null }) {
+function TrendChart({ period, setPeriod, viewMode, setViewMode, currency, invoices = [], bankStatements = [], isLoading = false, error = null, onRetry = null }) {
   const [hoveredPoint, setHoveredPoint] = useState(null)
 
   if (isLoading) {
@@ -199,8 +297,7 @@ function TrendChart({ period, setPeriod, viewMode, setViewMode, currency, invoic
     )
   }
 
-  const data = generateTrendData(period, invoices)
-
+  const data = generateTrendData(period, invoices, bankStatements)
 
   const totalRev = data.reduce((acc, d) => acc + d.revenue, 0)
   const totalExp = data.reduce((acc, d) => acc + d.expenses, 0)
@@ -353,8 +450,8 @@ function TrendChart({ period, setPeriod, viewMode, setViewMode, currency, invoic
       {/* Chart Footer Metrics */}
       <div className="chart-footer">
         <div className="chart-legend">
-          <span className="legend-item rev"><i /> Daily Revenue: <strong>{formatCurrency(totalRev, currency)}</strong></span>
-          <span className="legend-item exp"><i /> Daily Expenses: <strong>{formatCurrency(totalExp, currency)}</strong></span>
+          <span className="legend-item rev"><i /> Period Revenue: <strong>{formatCurrency(totalRev, currency)}</strong></span>
+          <span className="legend-item exp"><i /> Period Expenses: <strong>{formatCurrency(totalExp, currency)}</strong></span>
           <span className="legend-item net"><i /> Net Cashflow: <strong>{formatCurrency(netProfit, currency)}</strong></span>
         </div>
         <div className="chart-badge">
@@ -2269,13 +2366,27 @@ function App() {
                 <section className="kpi-grid">
                   {(() => {
                     const invoices = invoicesState.data || []
+                    const bankStatements = bankStmtState.data || []
+
                     const totalInvAmt = invoices.reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.totalAmountWithTax) || 0), 0)
                     const paidInvAmt = invoices.filter(inv => (inv.status || inv.paymentStatus || '').toLowerCase() === 'paid')
                                               .reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.paidAmount || inv.totalAmountWithTax) || 0), 0)
                     const unpaidInvAmt = invoices.filter(inv => (inv.status || inv.paymentStatus || '').toLowerCase() !== 'paid')
                                                 .reduce((acc, inv) => acc + (parseFloat(inv.amount || inv.totalAmountWithTax) || 0), 0)
-                    const estExpenses = totalInvAmt > 0 ? paidInvAmt * 0.35 : 0
-                    const netMarginPct = totalInvAmt > 0 ? (((paidInvAmt - estExpenses) / (paidInvAmt || 1)) * 100).toFixed(1) : '0.0'
+
+                    // Real bank statement transaction sums
+                    const bankDebits = bankStatements
+                      .filter(s => (s.txnType || '').toUpperCase() === 'DEBIT' || (s.txnType || '').toUpperCase() === 'DR')
+                      .reduce((acc, s) => acc + (parseFloat(s.amount) || 0), 0)
+
+                    const bankCredits = bankStatements
+                      .filter(s => ((s.txnType || '').toUpperCase() === 'CREDIT' || (s.txnType || '').toUpperCase() === 'CR') && !(s.description || '').toLowerCase().includes('opening balance'))
+                      .reduce((acc, s) => acc + (parseFloat(s.amount) || 0), 0)
+
+                    const totalRevenue = bankCredits > 0 ? bankCredits : paidInvAmt
+                    const totalExpenses = bankDebits > 0 ? bankDebits : (totalInvAmt > 0 ? paidInvAmt * 0.35 : 0)
+                    const netProfit = totalRevenue - totalExpenses
+                    const netMarginPct = totalRevenue > 0 ? (((netProfit) / (totalRevenue || 1)) * 100).toFixed(1) : '0.0'
 
                     return (
                       <>
@@ -2284,10 +2395,10 @@ function App() {
                             <span className="kpi-label">Total Revenue</span>
                             <div className="kpi-icon indigo"><Icon name="trending-up" size={18} /></div>
                           </div>
-                          <div className="kpi-value">{formatCurrency(paidInvAmt, currency)}</div>
+                          <div className="kpi-value">{formatCurrency(totalRevenue, currency)}</div>
                           <div className="kpi-footer positive">
                             <Icon name="trending-up" size={14} />
-                            <span><strong>{formatCurrency(paidInvAmt, currency)}</strong> collected</span>
+                            <span><strong>{formatCurrency(totalRevenue, currency)}</strong> collected</span>
                           </div>
                         </article>
 
@@ -2296,10 +2407,10 @@ function App() {
                             <span className="kpi-label">Operating Expenses</span>
                             <div className="kpi-icon rose"><Icon name="trending-down" size={18} /></div>
                           </div>
-                          <div className="kpi-value">{formatCurrency(estExpenses, currency)}</div>
+                          <div className="kpi-value">{formatCurrency(totalExpenses, currency)}</div>
                           <div className="kpi-footer neutral">
                             <Icon name="trending-down" size={14} />
-                            <span><strong>{formatCurrency(estExpenses, currency)}</strong> operational</span>
+                            <span><strong>{formatCurrency(totalExpenses, currency)}</strong> operational</span>
                           </div>
                         </article>
 
@@ -2308,7 +2419,7 @@ function App() {
                             <span className="kpi-label">Net Profit Margin</span>
                             <div className="kpi-icon emerald"><Icon name="dollar" size={18} /></div>
                           </div>
-                          <div className="kpi-value">{formatCurrency(Math.max(0, paidInvAmt - estExpenses), currency)}</div>
+                          <div className="kpi-value">{formatCurrency(Math.max(0, netProfit), currency)}</div>
                           <div className="kpi-footer positive">
                             <Icon name="sparkles" size={14} />
                             <span><strong>{netMarginPct}%</strong> net margin</span>
@@ -2340,9 +2451,10 @@ function App() {
                 setViewMode={setViewMode}
                 currency={currency}
                 invoices={invoicesState.data}
-                isLoading={invoicesState.isLoading}
-                error={invoicesState.error}
-                onRetry={fetchInvoices}
+                bankStatements={bankStmtState.data}
+                isLoading={invoicesState.isLoading || bankStmtState.isLoading}
+                error={invoicesState.error || bankStmtState.error}
+                onRetry={() => { fetchInvoices(); fetchBankStatements(); }}
               />
 
               {/* Unpaid Invoices Section */}
