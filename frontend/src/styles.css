@@ -575,6 +575,42 @@ button {
   color: #ffffff;
 }
 
+.sync-data-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.sync-data-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.sync-data-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spin-anim {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .notifications-wrap {
   position: relative;
 }

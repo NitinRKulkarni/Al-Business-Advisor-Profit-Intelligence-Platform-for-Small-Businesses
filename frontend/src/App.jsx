@@ -1862,23 +1862,40 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    fetchInvoices()
-    fetchDocuments()
-    fetchDemandIntelligence()
-    fetchBankStatements()
+  const [isSyncing, setIsSyncing] = useState(false)
 
+  const handleRefreshAll = async (isManual = false) => {
+    setIsSyncing(true)
+    try {
+      await Promise.allSettled([
+        fetchInvoices(isManual),
+        fetchDocuments(isManual),
+        fetchDemandIntelligence(isManual),
+        fetchBankStatements(isManual),
+      ])
+      if (isManual) {
+        showToast('All business intelligence and financial data refreshed successfully!', 'success', 5000)
+      }
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  useEffect(() => {
+    // 1. Initial fresh load on workspace mount / login
+    handleRefreshAll(false)
+
+    // 2. Periodic background auto-refresh every 1 hour (3600000ms)
+    const ONE_HOUR_MS = 60 * 60 * 1000
     const interval = setInterval(() => {
-      fetchDocuments()
-      fetchInvoices()
-      fetchDemandIntelligence()
-      fetchBankStatements()
-    }, 6000)
+      handleRefreshAll(false)
+    }, ONE_HOUR_MS)
+
     return () => {
       clearInterval(interval)
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     }
-  }, [])
+  }, [isAuthenticated])
 
   const updateFiles = (key, files, error = '') => {
     setUploads((current) => ({ ...current, [key]: files }))
@@ -2247,6 +2264,18 @@ function App() {
           </div>
 
           <div className="top-actions">
+            {/* Manual Sync / Refresh Button */}
+            <button
+              type="button"
+              className="sync-data-btn"
+              onClick={() => handleRefreshAll(true)}
+              disabled={isSyncing}
+              title="Manually refresh all financial records and AI intelligence"
+            >
+              <Icon name="refresh" size={14} className={isSyncing ? 'spin-anim' : ''} />
+              <span>{isSyncing ? 'Syncing...' : 'Sync Data'}</span>
+            </button>
+
             {/* Currency Selector */}
             <div className="currency-selector">
               <Icon name="globe" size={14} />
@@ -2483,8 +2512,8 @@ function App() {
                 demandData={insightsState.data}
                 isLoading={insightsState.isLoading}
                 error={insightsState.error}
-                onRetry={fetchDemandIntelligence}
-                onRefresh={fetchDemandIntelligence}
+                onRetry={() => fetchDemandIntelligence(true)}
+                onRefresh={() => fetchDemandIntelligence(true)}
                 isRefreshing={insightsState.isLoading}
                 onNavigateUploads={() => setActiveTab('uploads')}
               />
@@ -2750,8 +2779,8 @@ function App() {
                 demandData={insightsState.data}
                 isLoading={insightsState.isLoading}
                 error={insightsState.error}
-                onRetry={fetchDemandIntelligence}
-                onRefresh={fetchDemandIntelligence}
+                onRetry={() => fetchDemandIntelligence(true)}
+                onRefresh={() => fetchDemandIntelligence(true)}
                 isRefreshing={insightsState.isLoading}
                 onNavigateUploads={() => setActiveTab('uploads')}
               />
